@@ -1,1 +1,4 @@
 MyDiaryApp is a web app in which users can create and maintain multiple diaries. Users can add entries to each diary, choosing what content to contain in each entry, whether it be a text entry and/or photos. Users can also create their own tags by which to categorize their entries in a given diary. Entries can be sorted via selections from a drop-down menu, as well as searched by tag or keyword.
+
+Code Style
+For Python code, use pycodestyle. See https://pypi.org/project/pycodestyle/ for installation and other details. To install the linter plugin in Atom (IDE of choice), see https://atom.io/packages/linter-pycodestyle. After installation, open Atom and follow the prompts for installation of dependencies. Once all are complete, you should be able to navigate to the Packages tab in Atom's Settings page and find linter-pycodestyle there. When viewing python files, the number of errors and warnings will be marked in the bottom left menu bar of Atom.
