@@ -1,30 +1,27 @@
-import React, { Component } from 'react'
-import { Link } from 'react-router-dom';
-const EntryListBody = props => {
-
+import React, { Component } from "react";
+import { Link } from "react-router-dom";
+import Button from "react-bootstrap/Button";
+import "bootstrap/dist/css/bootstrap.min.css";
+const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
-      <tr key={index}>
-          <td>
-            <div class="button1">
-              <Link to="/entry/:id"><button class="button1">{row.name}</button></Link>
-            </div>
-          </td>
-     </tr>
-    )
-  })
+      <Link to="/entry/:id">
+        <div class="entry-block">
+          <button>{row.name}</button>
+        </div>
+        </Link>
+    );
+  });
 
-  return <tbody>{rows}</tbody>
-}
-const EntryList = props => {
-  const { entryData, removeCharacter } = props
+  return <tbody>{rows}</tbody>;
+};
+const EntryList = (props) => {
+  const { entryData } = props;
 
   return (
-
     <table>
-      <EntryListBody entryData={entryData} removeCharacter={removeCharacter} />
+      <EntryListBody entryData={entryData} />
     </table>
-
-  )
-}
-export default EntryList
+  );
+};
+export default EntryList;

@@ -378,12 +378,8 @@ h2:not(:first-child),
 h3:not(:first-child) {
   margin-top: 2rem; }
 
-.centered{
-  text-align: center;
-}
 h1 {
-  font-size: 1.75rem;
-   }
+  font-size: 1.75rem; }
 
 h2 {
   font-size: 1.5rem; }
@@ -402,8 +398,6 @@ h5 {
   h2:not(:first-child),
   h3:not(:first-child) {
     margin-top: 2.5rem; }
-  .welcome{
-    font-size: 2.5rem; }
   h1 {
     font-size: 2.25rem; }
   h2 {
@@ -488,6 +482,7 @@ dd {
 .full-container {
   max-width: 100%;
   padding: 0 1rem; }
+
 .container, .small-container, .medium-container {
   max-width: 1200px;
   padding: 0 1rem;
@@ -638,9 +633,9 @@ dd {
 .button, a.button, button, [type=submit], [type=reset], [type=button] {
   -webkit-appearance: none;
   display: inline-block;
-  /* border: 1px solid #888888;
-  border-radius: 4px; */
-  background: #888888;
+  border: 1px solid #0366EE;
+  border-radius: 4px;
+  background: #0366EE;
   color: #ffffff;
   font-weight: 600;
   font-family: -apple-system, BlinkMacSystemFont, Helvetica Neue, Helvetica, Arial, sans-serif;
@@ -653,11 +648,7 @@ dd {
   cursor: pointer;
   text-decoration: none;
   line-height: 1; }
-.button1{
-  width: 350px;
-  height: 100px;
-  font-size: 1.5rem;
-}
+
 .button:hover, a.button:hover, button:hover, [type=submit]:hover, [type=reset]:hover, [type=button]:hover {
   border: 1px solid #0250bc;
   background: #0250bc;
