@@ -52,3 +52,6 @@ class Entry(Model):
         for entry in entries:
             entry["_id"] = str(entry["_id"])
         return entries
+
+    def delete_all(self):
+        collection.delete_many({})
