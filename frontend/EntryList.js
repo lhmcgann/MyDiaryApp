@@ -5,10 +5,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
-      <Link to="/entry/:id">
-        <div class="entry-block">
-          <button>{row.name}</button>
-        </div>
+        <Link className="entry-block" to={`/entry/${row.title}`}>
+          {row.title}
+          <br />
+          {row.date}
         </Link>
     );
   });

@@ -4,14 +4,18 @@ import Button from "react-bootstrap/Button";
 class DiaryHome extends Component {
   state = {
     entries: [
-      { name: "a" },
-      { name: "b" },
-      { name: "c" },
-      { name: "d" },
-      { name: "e" },
-      { name: "f" },
-      { name: "g" },
-      { name: "h" },
+      { title: "Entry  0", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  1", date: "1/1/19", tags: "Blue" },
+      { title: "Entry  2", date: "1/4/19", tags: "Green" },
+      { title: "Entry  3", date: "1/5/19", tags: "Red" },
+      { title: "Entry  4", date: "1/2/19", tags: "Yellow" },
+      { title: "Entry  5", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  6", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  7", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  8", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  9", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  10", date: "1/3/19", tags: "Orange" },
+      { title: "Entry  11", date: "1/3/19", tags: "Orange" },
     ],
   };
   render() {

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
-
 const DiaryListBody = (props) => {
   const rows = props.characterData.map((row, index) => {
     return (
@@ -15,20 +14,11 @@ const DiaryListBody = (props) => {
   });
   return <tbody>{rows}</tbody>;
 };
-const DiaryListFooter = () => {
-  return (
-    <Link to="/new-diary/">
-      <button class="diary-block">+ Add Diary</button>
-    </Link>
-  );
-};
 const DiaryList = (props) => {
-  const { characterData } = props;
-
+  const { characterData } = props
   return (
     <table>
       <DiaryListBody characterData={characterData} />
-      <DiaryListFooter />
     </table>
   );
 };
