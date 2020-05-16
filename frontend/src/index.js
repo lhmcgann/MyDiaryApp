@@ -16,7 +16,7 @@ const routes = (
     <div>
       <Switch>
          <Route path="/" exact component={App} />
-         <Route path="/diary/:name/:id" component={DiaryHome} />
+         <Route path="/diary/:name" component={DiaryHome} />
          <Route path="/new-diary" component={NewDiary} />
          <Route path="/entry/:name" component={ViewEntry} />
          <Route path="/new-entry" component={NewEntry} />
