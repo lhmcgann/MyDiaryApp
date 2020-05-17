@@ -14,9 +14,8 @@ class Model(dict):
     def save(self):
         if not self._id:
             self.collection.insert(self)
-        else:
-            self.collection.update(
-                {"_id": ObjectId(self._id)}, self)
+        else:  # if has _id, must already be added (bc insert() creates the _id)
+            self.collection.update({"_id": ObjectId(self._id)}, self)
         self._id = str(self._id)
 
     def reload(self):
@@ -35,23 +34,36 @@ class Model(dict):
             return resp
 
 
-class Entry(Model):
+class Diary(Model):
     uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?retryWrites=true&w=majority'
     cluster = pymongo.MongoClient(uri)
-    db = cluster["diary1"]
-    collection = db["entries"]
+    db = cluster["myDiaryApp"]
+    collection = db["diaries"]
 
     def find_all(self):
-        entries = list(self.collection.find())
-        for entry in entries:
-            entry["_id"] = str(entry["_id"])
-        return entries
+        diaries = list(self.collection.find())
+        for diary in diaries:  # change ObjectIDs to strs
+            diary["_id"] = str(diary["_id"])
+        return diaries
 
     def find_by_title(self, title):
-        entries = list(self.collection.find({"title": title}))
-        for entry in entries:
-            entry["_id"] = str(entry["_id"])
-        return entries
+        diaries = list(self.collection.find({"title": title}))
+        for diary in diaries:  # change ObjectIDs to strs
+            diary["_id"] = str(diary["_id"])
+        return diaries
+
+
+    # def find_all(self):
+    #     entries = list(self.collection.find())
+    #     for entry in entries:
+    #         entry["_id"] = str(entry["_id"])
+    #     return entries
+    #
+    # def find_by_title(self, title):
+    #     entries = list(self.collection.find({"title": title}))
+    #     for entry in entries:
+    #         entry["_id"] = str(entry["_id"])
+    #     return entries
 
     # this successfully deletes all from db but html error bc wrong (nul) return
     # def delete_all(self):
