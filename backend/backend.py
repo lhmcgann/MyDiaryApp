@@ -21,4 +21,4 @@ def get_entries():
         resp = jsonify(newEntry), 200
         return resp
     if request.method == "DELETE":
-    	Entry().delete_all()
+        Entry().delete_all()

@@ -39,7 +39,7 @@ class Entry(Model):
     uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?retryWrites=true&w=majority'
     cluster = pymongo.MongoClient(uri)
     db = cluster["diary1"]
-    collection = db["diary1"]
+    collection = db["entries"]
 
     def find_all(self):
         entries = list(self.collection.find())
@@ -53,5 +53,6 @@ class Entry(Model):
             entry["_id"] = str(entry["_id"])
         return entries
 
-    def delete_all(self):
-        collection.delete_many({})
+    # this successfully deletes all from db but html error bc wrong (nul) return
+    # def delete_all(self):
+    #     print("DELETED RESULT:" + str(self.collection.delete_many({}).raw_result))
