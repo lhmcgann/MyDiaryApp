@@ -36,24 +36,6 @@ class Model(dict):
             return resp
 
 
-class Entry(Model):
-    cluster = pymongo.MongoClient(uri)
-    db = cluster["myDiaryApp"]
-    collection = db["entries"]
-
-    def find_all(self):
-        entries = list(self.collection.find())
-        for entry in entries:
-            entry["_id"] = str(entry["_id"])
-        return entries
-
-    def find_by_title(self, title):
-        entries = list(self.collection.find({"title": title}))
-        for entry in entries:
-            entry["_id"] = str(entry["_id"])
-        return entries
-
-
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
     db = cluster["myDiaryApp"]
