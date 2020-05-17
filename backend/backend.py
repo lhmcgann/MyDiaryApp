@@ -25,7 +25,7 @@ CORS(app)
 
 
 @app.route('/diaries', methods=['GET', 'POST'])
-def get_entries():
+def get_diaries():
     if request.method == "GET":
         diaries = Diary().find_all()
         return {"diaries": diaries}, 200
@@ -34,4 +34,19 @@ def get_entries():
         newDiary = Diary(diaryToAdd)
         newDiary.save()
         resp = jsonify(newDiary), 200
+        return resp
+
+
+# this needs to be done properly; still just copy pasted
+@app.route('/diaries/<id>/entries', methods=['GET', 'POST'])
+def get_entries(id):
+    diary = Diary({"_id": id})
+    if request.method == "GET":
+        entries = Diary().find_all_entries()
+        return {"entries": entries}, 200
+    if request.method == 'POST':
+        entryToAdd = request.get_json()
+        newEntry = Entry(entryToAdd)
+        newEntry.save()
+        resp = jsonify(newEntry), 200
         return resp
