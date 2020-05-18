@@ -1,8 +1,8 @@
 import React, { Component } from "react";
-
 class DiaryButton extends Component {
   initialState = {
     name: "",
+    id: Math.random().toString(36).substring(7),
   };
 
   state = this.initialState;

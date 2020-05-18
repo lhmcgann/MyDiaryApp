@@ -6,12 +6,16 @@ import "./styles.css";
 import { Link } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 class App extends Component {
-  state = {
-    characters: [],
-  };
+  constructor(props){
+        super(props);
+        this.state = {
+          characters: [],
+        };
+    }
   handleSubmit = (character) => {
-      this.setState({ characters: [...this.state.characters, character] });
+    this.setState({ characters: [...this.state.characters, character] });
   };
+  
   render() {
     const { characters } = this.state;
     return (
