@@ -5,8 +5,8 @@ const DiaryListBody = (props) => {
     return (
       <div class="centered">
         <h5 key = {index}>
-        <Link to={{pathname: `/diary/${row.id}`, state: row.name}}>
-          <button class="diary-block">{row.name}</button>
+        <Link to={{pathname: `/diary/${row.key}`, title: row.title}}>
+          <button class="diary-block">{row.title}</button>
         </Link>
         </h5>
       </div>
