@@ -12,10 +12,10 @@ jobs:
     -python -m flask run
   - language: node_js
     node_js: 12
+    before_install:
+    - cd frontend
     install:
     - npm install
-    before_deploy:
-    - cd frontend
     script:
     - npm run build
 
