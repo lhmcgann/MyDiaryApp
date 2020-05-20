@@ -1,11 +1,10 @@
 import React, { Component } from "react";
-import EntryList from "./EntryList"
-import Button from "react-bootstrap/Button";
+import EntryList from "./EntryList";
+// import Button from "react-bootstrap/Button";
 class DiaryHome extends Component {
-
-constructor(props){
-  super(props);
-  this.state = {
+  constructor(props) {
+    super(props);
+    this.state = {
       entries: [],
     };
   }
