@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 const DiaryListBody = (props) => {
   const rows = props.characterData.map((row, index) => {
