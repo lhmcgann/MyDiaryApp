@@ -1,11 +1,17 @@
 language: python
 
-python:
-- 2.7
-
-install:
-- pip install -r backend/requirements.txt
-
-script:
-- pytest -v backend/*_tests.py
+jobs:
+  include:
+  - language: python
+    python: 2.7
+    install:
+    - pip install -r backend/requirements.txt
+    script:
+    - pytest -v backend/*_tests.py
+  - language: node_js
+    node_js: 12
+    install:
+    - npm install
+    script:
+    - npm run build
 
