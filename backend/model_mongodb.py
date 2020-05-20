@@ -2,7 +2,8 @@ import pymongo
 from pymongo import MongoClient
 from bson import ObjectId
 
-uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?retryWrites=true&w=majority'
+uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\
+    tryWrites=true&w=majority'
 
 
 class Model(dict):
@@ -43,7 +44,7 @@ class Diary(Model):
 
     def find_all(self):
         diaries = list(self.collection.find())
-        for diary in diaries:  # change ObjectIDs to strs
+        for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
             diary["_id"] = str(diary["_id"])
         return diaries
 
