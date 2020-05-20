@@ -37,6 +37,32 @@ class Model(dict):
             return resp
 
 
+class Entry(Model):
+    cluster = pymongo.MongoClient(uri)
+    db = cluster["myDiaryApp"]
+    collection = db["diaries"]
+
+    def reload(self):
+        if self.d_id and self._id:  # if in the db
+            diary = Diary({"_id": self.d_id})
+            res = diary.reload()  # reload full diary object
+            if res:  # True or False
+                res = find_entry_in_diary(diary)
+            if res:  # None of entry dict
+                self.remove("d_id", None)
+                self.update(res)  # python dict update
+                self._id = str(self._id)  # may also need to convert entry ids
+                return True
+        return False
+
+    # for internal use mostly (see above reload); prereq: diary != none
+    def find_entry_in_diary(self, diary):
+        for entry in diary["entries"]:
+            if self._id is str(entry._id):
+                return entry
+        return None
+
+
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
     db = cluster["myDiaryApp"]
