@@ -25,8 +25,8 @@ class Model(dict):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
-                self.update(result)
-                self._id = str(self._id)
+                self.update(result)  # updates created Diary (w/ id) to full doc
+                self._id = str(self._id)  # may also need to convert entry ids
                 return True
         return False
 
@@ -46,6 +46,8 @@ class Diary(Model):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
             diary["_id"] = str(diary["_id"])
+            for entry in diary["entries"]:
+                entry["_id"] = str(entry["_id"])
         return diaries
 
     def find_by_title(self, title):

@@ -24,15 +24,18 @@ def get_diaries():
 
 
 # this needs to be done properly; still just copy pasted
-@app.route('/diaries/<id>/entries', methods=['GET', 'POST'])
+@app.route('/diaries/<id>', methods=['GET', 'DELETE'])
 def get_entries(id):
     diary = Diary({"_id": id})
     if request.method == "GET":
-        entries = Diary().find_all_entries()
-        return {"entries": entries}, 200
-    if request.method == 'POST':
-        entryToAdd = request.get_json()
-        newEntry = Entry(entryToAdd)  # don't have an Entry class...
-        newEntry.save()
-        resp = jsonify(newEntry), 200
-        return resp
+        diary.reload()
+        return diary, 200
+    if request.method == 'DELETE':
+        success = diary.remove()
+        return jsonify(success), 204  # set http response to show No Content
+
+        # entryToAdd = request.get_json()
+        # newEntry = Entry(entryToAdd)  # don't have an Entry class...
+        # newEntry.save()
+        # resp = jsonify(newEntry), 200
+        # return resp
