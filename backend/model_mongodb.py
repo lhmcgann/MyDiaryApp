@@ -43,13 +43,24 @@ class Entry(Model):
     db = cluster["myDiaryApp"]
     collection = db["entries"]
 
+    def save(self):
+        super.save()
+        if self.d_id:  # if diary id (so diary should exist)
+            diary = Diary({"_id": d_id})
+            res = diary.reload()
+            if res:  # if can load diary json obj
+                entry = find_entry_in_diary(diary)
+                if not entry:  # if new entry
+                    diary["entries"].append(ObjectId(self._id))
+                    diary.save()
+
     def reload(self):
         if self.d_id:  # if diary in the db
             self.remove("d_id", None)  # real entry doesn't need diary id field
             return super().reload()
         return False
 
-    # for internal use mostly (see old reload); prereq: diary != none
+    # for internal use mostly (see above save); prereq: diary != none
     def find_entry_in_diary(self, diary):
         for id in diary["entries"]:  # entries = [ObjectIds]
             if self._id is str(id):
