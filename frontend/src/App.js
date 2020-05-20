@@ -10,7 +10,7 @@ class App extends Component {
     axios
       .get("http://localhost:5000/diaries")
       .then((res) => {
-        const characters = res.data;
+        const characters = res.data.diaries;
         this.setState({ characters });
       })
       .catch(function (error) {
@@ -32,13 +32,13 @@ class App extends Component {
       });
   }
   state = { characters: [] };
-  handleSubmit = character => {
-    this.makePostCall(character).then( callResult => {
-       if (callResult === true) {
-          this.setState({ characters: [...this.state.characters, character] });
-       }
+  handleSubmit = (character) => {
+    this.makePostCall(character).then((callResult) => {
+      if (callResult === true) {
+        this.setState({ characters: [...this.state.characters, character] });
+      }
     });
-  }
+  };
 
   render() {
     const { characters } = this.state;

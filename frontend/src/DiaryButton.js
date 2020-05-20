@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 class DiaryButton extends Component {
   initialState = {
-    key: Math.random().toString(36).substring(1),
+    // key: Math.random().toString(36).substring(1),
     dateCreated: new Date().toUTCString(),
     entries: [],
     title: "",
