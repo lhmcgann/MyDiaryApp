@@ -1,6 +1,6 @@
 import pytest
 import pymongo
-from pymongo import MongoClient
+from bson import ObjectId
 from model_mongodb import *
 
 
@@ -14,11 +14,6 @@ from model_mongodb import *
 #     diaries = Diary().find_all()
 #     assert num_diaries == len(diaries)
 
-def test_diary_reload_DNE():
+def test_diary_reload_dne():
     diary = Diary()
-    assert diary.reload() is False
-
-
-def test_diary_reload_bad_id():
-    diary = Diary({"_id": "bad id"})
     assert diary.reload() is False

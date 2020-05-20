@@ -2,8 +2,7 @@ import pymongo
 from pymongo import MongoClient
 from bson import ObjectId
 
-uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\
-    tryWrites=true&w=majority'
+uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
 
 class Model(dict):
