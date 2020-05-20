@@ -10,7 +10,7 @@ class App extends Component {
     axios
       .get("http://localhost:5000/diaries")
       .then((res) => {
-        const characters = res.data.diaries;
+        const characters = res.data; //.diaries;
         this.setState({ characters });
       })
       .catch(function (error) {

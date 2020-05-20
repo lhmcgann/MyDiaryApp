@@ -13,7 +13,8 @@ CORS(app)
 def get_diaries():
     if request.method == "GET":
         diaries = Diary().find_all()
-        return {"diaries": diaries}, 200
+        # return {"diaries": diaries}, 200
+        return jsonify(diaries), 200
     if request.method == 'POST':
         diaryToAdd = request.get_json()
         newDiary = Diary(diaryToAdd)
