@@ -37,29 +37,23 @@ class Model(dict):
             return resp
 
 
+# if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
     cluster = pymongo.MongoClient(uri)
     db = cluster["myDiaryApp"]
-    collection = db["diaries"]
+    collection = db["entries"]
 
     def reload(self):
-        if self.d_id and self._id:  # if in the db
-            diary = Diary({"_id": self.d_id})
-            res = diary.reload()  # reload full diary object
-            if res:  # True or False
-                res = find_entry_in_diary(diary)
-            if res:  # None of entry dict
-                self.remove("d_id", None)
-                self.update(res)  # python dict update
-                self._id = str(self._id)  # may also need to convert entry ids
-                return True
+        if self.d_id:  # if diary in the db
+            self.remove("d_id", None)  # real entry doesn't need diary id field
+            return super().reload()
         return False
 
-    # for internal use mostly (see above reload); prereq: diary != none
+    # for internal use mostly (see old reload); prereq: diary != none
     def find_entry_in_diary(self, diary):
-        for entry in diary["entries"]:
-            if self._id is str(entry._id):
-                return entry
+        for id in diary["entries"]:  # entries = [ObjectIds]
+            if self._id is str(id):
+                return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
 
@@ -71,16 +65,21 @@ class Diary(Model):
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
-            diary["_id"] = str(diary["_id"])
-            for entry in diary["entries"]:
-                entry["_id"] = str(entry["_id"])
+            diary = make_printable(diary)
         return diaries
 
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change ObjectIDs to strs
-            diary["_id"] = str(diary["_id"])
+            diary = make_printable(diary)
         return diaries
+
+    def make_printable(self, diary):
+        diary["_id"] = str(diary["_id"])
+        entries = diary["entries"]
+        for i in range(len(entries)):
+            entries[i] = str(entries[i])
+        return diary
 
     # this successfully deletes all from db but html error bc wrong (nul) return
     # def delete_all(self):
