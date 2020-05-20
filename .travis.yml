@@ -9,7 +9,7 @@ jobs:
     script:
     - pytest -v backend/*_test.py
     flask:
-    -python -m flask run
+    - python -m flask run
   - language: node_js
     node_js: 12
     before_install:
