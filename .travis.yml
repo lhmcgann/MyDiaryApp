@@ -8,7 +8,6 @@ jobs:
     - pip install -r backend/requirements.txt
     script:
     - cd backend
-    - source python_env/bin/activate
     - python -m flask run
     - pytest -v backend/*_tests.py
     - cd ..
