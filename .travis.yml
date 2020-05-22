@@ -7,10 +7,11 @@ jobs:
     install:
     - pip install -r backend/requirements.txt
     script:
-    - export FLASK_APP=backend.py
-    - export FLASK_APP=development
+    - cd backend
+    - source python_env/bin/activate
     - python -m flask run
     - pytest -v backend/*_tests.py
+    - cd ..
   - language: node_js
     node_js: 12
     before_install:

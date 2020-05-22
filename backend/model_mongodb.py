@@ -1,4 +1,5 @@
 import pymongo
+import ssl
 from pymongo import MongoClient
 from bson import ObjectId
 
@@ -38,7 +39,7 @@ class Model(dict):
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
-    cluster = pymongo.MongoClient(uri)
+    cluster = pymongo.MongoClient(uri, ssl_cert_reqs=ssl.CERT_NONE)
     db = cluster["myDiaryApp"]
     collection = db["entries"]
 
