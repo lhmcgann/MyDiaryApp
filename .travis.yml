@@ -2,21 +2,20 @@ language: python
 
 jobs:
   include:
-  - language: python
-    python: 2.7
-    install:
-    - pip install -r backend/requirements.txt
-    script:
-    - cd backend
-    - source python_env/bin/activate
-    - python -m flask run
-    - pytest -v backend/*_tests.py
-    - cd ..
-  - language: node_js
-    node_js: 12
-    before_install:
-    - cd frontend
-    install:
-    - npm install
-    script:
-    - npm run build
+    - language: python
+      python: 3.6
+      before_install:
+        - . backend/python_env/bin/activate
+      install:
+        - pip install --user -r backend/requirements.txt
+      script:
+        - pytest -v backend/*_tests.py
+        - deactivate
+    - language: node_js
+      node_js: 12
+      before_install:
+        - cd frontend
+      install:
+        - npm install
+      script:
+        - npm run build
