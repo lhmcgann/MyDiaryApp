@@ -3,13 +3,16 @@ language: python
 jobs:
   include:
   - language: python
-    python: 2.7
+    python:
+    - 2.7
+    - 3.6
+    - 3.7
     install:
     - pip install -r backend/requirements.txt
     script:
     - cd backend
     - python -m flask run
-    - pytest -v backend/*_tests.py
+    - pytest -v *_tests.py
     - cd ..
   - language: node_js
     node_js: 12
