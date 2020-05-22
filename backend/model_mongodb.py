@@ -1,4 +1,5 @@
 import pymongo
+import ssl
 from pymongo import MongoClient
 from bson import ObjectId
 
@@ -37,7 +38,7 @@ class Model(dict):
 
 
 class Entry(Model):
-    cluster = pymongo.MongoClient(uri)
+    cluster = pymongo.MongoClient(uri, ssl_cert_reqs=ssl.CERT_NONE)
     db = cluster["myDiaryApp"]
     collection = db["diaries"]
 
