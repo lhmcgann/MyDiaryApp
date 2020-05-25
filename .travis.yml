@@ -4,10 +4,13 @@ jobs:
   include:
   - language: python
     python: 3.6
+    before_install:
+    - . backend/python_env/bin/activate
     install:
-    - pip install -r backend/requirements.txt
+    - pip install --user -r backend/requirements.txt
     script:
     - pytest -v backend/*_tests.py
+    - deactivate
   - language: node_js
     node_js: 12
     before_install:
