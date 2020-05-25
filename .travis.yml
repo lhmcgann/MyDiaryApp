@@ -3,7 +3,7 @@ language: python
 jobs:
   include:
   - language: python
-    python: 2.7
+    python: 3.6
     install:
     - pip install -r backend/requirements.txt
     script:
