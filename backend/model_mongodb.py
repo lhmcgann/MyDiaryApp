@@ -32,7 +32,7 @@ class Model(dict):
 
     def remove(self):
         if self._id:
-            resp = self.collection.remove({"_id": ObjectId(self._id)})
+            resp = self.collection.delete_one({"_id": ObjectId(self._id)})
             self.clear()
             return resp
 
@@ -45,26 +45,39 @@ class Entry(Model):
 
     def save(self):
         super.save()
-        if self.d_id:  # if diary id (so diary should exist)
-            diary = Diary({"_id": d_id})
-            res = diary.reload()
-            if res:  # if can load diary json obj
-                entry = find_entry_in_diary(diary)
-                if not entry:  # if new entry
-                    diary["entries"].append(ObjectId(self._id))
-                    diary.save()
+        diary = get_diary()                 # the filled Diary obj
+        entry = find_entry_in_diary(diary)  # the entry json obj
+        if not entry:                       # if new entry
+            # TODO: does this change in db or just local var?
+            diary["entries"].append(ObjectId(self._id))
+            diary.save()
 
     def reload(self):
-        if self.d_id:  # if diary in the db
+        if self.d_id:                  # if diary in the db
             self.remove("d_id", None)  # real entry doesn't need diary id field
             return super().reload()
         return False
 
-    # for internal use mostly (see above save); prereq: diary != none
+    def remove(self):
+        diary = get_diary()     # the filled Diary obj
+        if diary:               # remove id from diary's entries array
+            diary.collection.update_one({'_id': diary._id},
+                                        {'$pull': {'entries': ObjectId(self._id)}})
+        return super.remove()   # remove from entries collection
+
+    def get_diary(self):
+        res = None
+        if self.d_id:           # if diary id (so diary should exist)
+            diary = Diary({"_id": d_id})
+            res = diary.reload()
+        return res
+
+    # for internal use mostly (see above save)
     def find_entry_in_diary(self, diary):
-        for id in diary["entries"]:  # entries = [ObjectIds]
-            if self._id is str(id):
-                return self.collection.find_one({"_id": ObjectId(self._id)})
+        if diary:
+            for id in diary["entries"]:  # entries = [ObjectIds]
+                if self._id is str(id):
+                    return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
 
