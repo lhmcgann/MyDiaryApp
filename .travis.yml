@@ -9,8 +9,6 @@ jobs:
       install:
         - pip install --user -r backend/requirements.txt
       script:
-        - cd backend
-        - flask run
         - pytest -v backend/*_tests.py
         - deactivate
     - language: node_js
