@@ -2,17 +2,21 @@ from flask import Flask
 from flask import request
 from flask import jsonify
 from flask_cors import CORS
+from flask import abort
 import ssl
 from model_mongodb import Diary
+import data_model as model
 
 app = Flask(__name__)
 CORS(app)
 
+diaries = []
+
 
 @app.route('/diaries', methods=['GET', 'POST'])
-def get_diaries():
+def retrieve_diaries():
     if request.method == "GET":
-        diaries = Diary().find_all()
+        # diaries = Diary().find_all()
         # return {"diaries": diaries}, 200
         return jsonify([diary.__dict__ for diary in diaries]), 200
     elif request.method == 'POST':
@@ -65,7 +69,7 @@ def retrieve_diary(diaryId):
 # this needs to be done properly; still just copy pasted
 @app.route('/diaries/<id>', methods=['GET', 'DELETE'])
 def get_entries(id):
-    diary = Diary({"_id": id})
+    # diary = Diary({"_id": id})
     if request.method == "GET":
         diary.reload()
         return diary, 200

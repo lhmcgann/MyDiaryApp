@@ -1,6 +1,7 @@
 import time
 import json
 
+<<<<<<< HEAD
 
 class Diary:
     def __init__(self, title):
