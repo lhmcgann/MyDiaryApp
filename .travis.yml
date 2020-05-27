@@ -8,7 +8,7 @@ jobs:
     - pip install -r backend/requirements.txt
     script:
     - cd backend
-    - python -m flask run
+    - flask run
     - pytest -v backend/*_tests.py
     - cd ..
   - language: node_js
