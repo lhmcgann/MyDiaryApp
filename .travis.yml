@@ -3,14 +3,19 @@ language: python
 jobs:
   include:
   - language: python
-    python: 2.7
+    python: 3.6
+    before_install:
+    - . backend/python_env/bin/activate
     install:
-    - pip install -r backend/requirements.txt
+    - pip install --user -r backend/requirements.txt
     script:
+<<<<<<< HEAD
     - cd backend
     - flask run
+=======
+>>>>>>> 73d089707f881f5bbcc84341f18b01d8e295fe5f
     - pytest -v backend/*_tests.py
-    - cd ..
+    - deactivate
   - language: node_js
     node_js: 12
     before_install:
