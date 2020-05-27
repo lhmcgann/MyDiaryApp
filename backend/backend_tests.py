@@ -1,5 +1,5 @@
 import pytest
-# import requests
+import requests
 
 
 def test_get_diaries_get():

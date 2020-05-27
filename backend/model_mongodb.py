@@ -6,6 +6,7 @@ from bson import ObjectId
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 TEST = True
 
+
 class Model(dict):
     """
     A simple model that wraps mongodb document
