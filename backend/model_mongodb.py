@@ -44,13 +44,17 @@ class Entry(Model):
     collection = db["entries"]
 
     def save(self):
+        diary = self.get_diary()                 # the filled Diary obj
+        if not diary:
+            return False
         super.save()
-        diary = get_diary()                 # the filled Diary obj
-        entry = find_entry_in_diary(diary)  # the entry json obj
+        entry = self.find_entry_in_diary(diary)  # the entry json obj
         if not entry:                       # if new entry
             # TODO: does this change in db or just local var?
             diary["entries"].append(ObjectId(self._id))
             diary.save()
+            return True
+        return False
 
     def reload(self):
         if self.d_id:                  # if diary in the db
