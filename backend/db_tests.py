@@ -27,6 +27,24 @@ def test_diary_save_new():
         assert item in diary
 
 
+def test_diary_save_old():
+    title = "test_diary_save_new"
+    doc = Diary.collection.find_one({"title": title})
+    assert doc is not None
+
+    diary = Diary(doc)
+    for item in doc:
+        assert item in diary
+
+    # make change
+    newDate = "something new"
+    diary["dateCreated"] = newDate
+    diary.save()
+    assert isinstance(diary._id, str)
+    res = Diary.collection.find_one({"title": title})
+    assert res["dateCreated"] == newDate
+
+
 # removes the diary inserted in test_diary_save_new to test and help reset
 def test_diary_remove():
     title = "test_diary_save_new"

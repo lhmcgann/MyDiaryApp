@@ -22,7 +22,7 @@ class Model(dict):
             # TODO: any better way to handle _id's?
             id = self["_id"]
             del self["_id"]
-            self.collection.update_one({"_id": ObjectId(self._id)}, {'$set': self})
+            self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
         self._id = str(self._id)
 
@@ -57,9 +57,8 @@ class Entry(Model):
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
         if not entry:                       # if new entry
-            # TODO: why would changing diary and calling save() not work?
-            diary.collection.update_one({'_id': ObjectId(diary._id)},
-                                        {'$push': {'entries': ObjectId(self._id)}})
+            diary["entries"].append(ObjectId(self._id))
+            diary.save()
             return True
         return False
 
