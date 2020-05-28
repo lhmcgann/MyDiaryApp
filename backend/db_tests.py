@@ -34,13 +34,13 @@ TEST_DB = "tests"
 def test_setDB_entry():
     entry = Entry()
 
-    clxns = entry.db.collection_names()
+    clxns = entry.db.list_collection_names()
     expect = ["tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
     entry.setDB(TEST_DB)
-    clxns = entry.db.collection_names()
+    clxns = entry.db.list_collection_names()
     expect = ["tests", "diaries", "entries"]
     for item in clxns:
         assert item in expect
@@ -49,13 +49,13 @@ def test_setDB_entry():
 def test_setDB_diary():
     diary = Diary()
 
-    clxns = diary.db.collection_names()
+    clxns = diary.db.list_collection_names()
     expect = ["tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
     diary.setDB(TEST_DB)
-    clxns = diary.db.collection_names()
+    clxns = diary.db.list_collection_names()
     expect = ["tests", "diaries", "entries"]
     for item in clxns:
         assert item in expect
