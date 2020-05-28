@@ -144,10 +144,12 @@ def test_find_entry_in_diary_found():
     title = "test_find_entry_in_diary_found"
     doc = {"title": title, "tags": [], "textBody": "nothing",
            "dateCreated": "TODO"}
+    # put entry in db (to give it an _id) and then find in db
     Entry.collection.insert_one(doc)
     from_db = Entry.collection.find_one({"title": title})
     assert from_db is not None
 
+    # put entry's _id into diary entries array
     id = from_db["_id"]
     Diary.collection.update_one({"_id": ObjectId(D_ID)},
                                 {'$push': {'entries': id}})
@@ -157,6 +159,12 @@ def test_find_entry_in_diary_found():
     assert diary is not None
     res = entry.find_entry_in_diary(diary)
     assert res == from_db
+
+    # print("ENTRY: " + str(entry))
+    # entry["d_id"] = D_ID
+    # entry.reload()
+    # print("ENTRY: " + str(entry))
+    # entry.remove()  # cleanup
 
 
 def test_entry_save_no_diary():
@@ -234,6 +242,13 @@ def test_entry_remove_id_valid():
     num2 = len(diary["entries"])
     assert num == (num2 + 1)
     assert id not in diary["entries"]
+
+
+def test_end():
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    assert len(diary["entries"]) == 0
+    assert Entry.collection.find_many({}) is None
 
 
 # uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\
