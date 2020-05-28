@@ -4,6 +4,9 @@ from bson import ObjectId
 from model_mongodb import *
 
 
+# TODO: figure out how to reset after tests to make it more reliable/indp
+
+
 # TEST is a boolean const set in model_mongodb
 def test_in_testing_mode():
     assert TEST is True

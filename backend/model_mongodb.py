@@ -19,6 +19,7 @@ class Model(dict):
         if not self._id:
             self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
+            # TODO: any better way to handle _id's?
             id = self["_id"]
             del self["_id"]
             self.collection.update_one({"_id": ObjectId(self._id)}, {'$set': self})
@@ -56,6 +57,7 @@ class Entry(Model):
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
         if not entry:                       # if new entry
+            # TODO: why would changing diary and calling save() not work?
             diary.collection.update_one({'_id': ObjectId(diary._id)},
                                         {'$push': {'entries': ObjectId(self._id)}})
             return True
