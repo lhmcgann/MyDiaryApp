@@ -4,57 +4,31 @@ from bson import ObjectId
 from model_mongodb import *
 
 
-TEST_DB = "tests"
+# TEST is a boolean const set in model_mongodb
+def test_in_testing_mode():
+    assert TEST is True
 
 
-# class TEntry(Entry):
-#     cluster = pymongo.MongoClient(uri, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-#     db = cluster["tests"]
-#     collection = db["entries"]
-#
-#
-# class TDiary(Diary):
-#     cluster = pymongo.MongoClient(uri, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-#     db = cluster["tests"]
-#     collection = db["diaries"]
-#
-#
-# # to use for testing
-# def set_entry_test_db(entry):
-#     entry.db = entry.cluster["tests"]
-#     entry.collection = entry.db["entries"]
-#
-#
-# # to use for testing
-# def set_diary_test_db(diary):
-#     diary.db = diary.cluster["tests"]
-#     diary.collection = diary.db["diaries"]
+def test_diary_reload():
+    diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
+    d_id = "5ececfbc28f47f5e4408ca45"
+    diary = Diary({"_id": d_id})
+    assert diary.reload() is True
+    assert isinstance(diary["_id"], str) is True
+    for item in diary_model:
+        assert item in diary
 
 
-def test_setDB_entry():
+def test_entry_gets_TEST():
     entry = Entry()
-
-    clxns = entry.db.list_collection_names()
-    expect = ["tags", "diaries", "entries"]
-    for item in clxns:
-        assert item in expect
-
-    entry.setDB(TEST_DB)
     clxns = entry.db.list_collection_names()
     expect = ["tests", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
 
-def test_setDB_diary():
+def test_diary_gets_TEST():
     diary = Diary()
-
-    clxns = diary.db.list_collection_names()
-    expect = ["tags", "diaries", "entries"]
-    for item in clxns:
-        assert item in expect
-
-    diary.setDB(TEST_DB)
     clxns = diary.db.list_collection_names()
     expect = ["tests", "diaries", "entries"]
     for item in clxns:
@@ -63,13 +37,11 @@ def test_setDB_diary():
 
 def test_new_entry_no_diary():
     entry = Entry()
-    entry.setDB(TEST_DB)
     assert entry.save() is False
 
 
 def test_diary_reload_dne():
     diary = Diary()
-    diary.setDB(TEST_DB)
     assert diary.reload() is False
 
 

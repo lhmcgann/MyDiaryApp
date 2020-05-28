@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
+TEST = True
 
 
 class Model(dict):
@@ -16,9 +17,10 @@ class Model(dict):
 
     def save(self):
         if not self._id:
-            self.collection.insert(self)
+            self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
-            self.collection.update({"_id": ObjectId(self._id)}, self)
+            del self["_id"]
+            self.collection.update_one({"_id": ObjectId(self._id)}, {'$set': self})
         self._id = str(self._id)
 
     def reload(self):
@@ -40,27 +42,16 @@ class Model(dict):
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
     cluster = pymongo.MongoClient(uri, ssl=True, tlsAllowInvalidCertificates=False)
-    dbStr = "myDiaryApp"
+    dbStr = ("tests" if TEST else "myDiaryApp")
     db = cluster[dbStr]
     collection = db["entries"]
 
-    # def __init__(self, db="myDiaryApp"):
-    #     self.db = db
-    #     self.collection = Entry.cluster[db]["entries"]
-
-    def setDB(self, db):
-        Entry.dbStr = db
-        Entry.db = Entry.cluster[db]
-        Entry.collection = Entry.db["entries"]
-
     def save(self):
         diary = self.get_diary()                 # the filled Diary obj
-        print("DIARY: " + str(diary))
         if not diary:
             return False
-        super.save()
+        super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
-        print("ENTRY: " + str(entry))
         if not entry:                       # if new entry
             # TODO: does this change in db or just local var?
             diary["entries"].append(ObjectId(self._id))
@@ -71,7 +62,7 @@ class Entry(Model):
     def reload(self):
         if self.d_id:                  # if diary in the db
             self.remove("d_id", None)  # real entry doesn't need diary id field
-            return super().reload()
+            return super(Entry, self).reload()
         return False
 
     def remove(self):
@@ -79,15 +70,14 @@ class Entry(Model):
         if diary:               # remove id from diary's entries array
             diary.collection.update_one({'_id': diary._id},
                                         {'$pull': {'entries': ObjectId(self._id)}})
-        return super.remove()   # remove from entries collection
+        return super(Entry, self).remove()   # remove from entries collection
 
     def get_diary(self):
-        res = None
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
-            diary.setDB(self.dbStr)
-            res = diary.reload()
-        return res
+            diary.reload()
+            return diary
+        return None
 
     # for internal use mostly (see above save)
     def find_entry_in_diary(self, diary):
@@ -100,17 +90,9 @@ class Entry(Model):
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
-    dbStr = "myDiaryApp"
+    dbStr = ("tests" if TEST else "myDiaryApp")
     db = cluster[dbStr]
     collection = db["diaries"]
-
-    # def __init__(self, db="myDiaryApp"):
-    #     self.collection = Diary.cluster[db]["diaries"]
-
-    def setDB(self, db):
-        Diary.dbStr = db
-        Diary.db = Diary.cluster[db]
-        Diary.collection = Diary.db["diaries"]
 
     def find_all(self):
         diaries = list(self.collection.find())
