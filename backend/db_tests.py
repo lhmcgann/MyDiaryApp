@@ -5,11 +5,12 @@ from model_mongodb import *
 
 
 # TODO: figure out how to reset after tests to make it more reliable/indp
-
+D_ID = "5ececfbc28f47f5e4408ca45"
 
 # TEST is a boolean const set in model_mongodb
-def test_in_testing_mode():
+def test_setup():
     assert TEST is True
+    assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
 
 
 def test_entry_gets_TEST():
@@ -88,8 +89,7 @@ def test_diary_reload_dne():
 
 def test_diary_reload():
     diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
-    d_id = "5ececfbc28f47f5e4408ca45"
-    diary = Diary({"_id": d_id})
+    diary = Diary({"_id": D_ID})
     assert diary.reload() is True
     assert isinstance(diary["_id"], str) is True
     for item in diary_model:
@@ -102,8 +102,7 @@ def test_new_entry_no_diary():
 
 
 def test_new_entry_with_diary():
-    d_id = "5ececfbc28f47f5e4408ca45"
-    doc = {"d_id": d_id, "tags": [], "textBody": "blah",
+    doc = {"d_id": D_ID, "tags": [], "textBody": "blah",
            "title": "test_new_entry_with_diary"}
     entry = Entry(doc)
 
@@ -119,7 +118,7 @@ def test_new_entry_with_diary():
         assert item in res
 
     # check entry _id got into diary's entries array
-    diary = Diary({"_id": d_id})
+    diary = Diary({"_id": D_ID})
     diary.reload()
     assert res["_id"] in diary["entries"]
 
