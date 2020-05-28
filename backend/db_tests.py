@@ -12,6 +12,22 @@ def test_in_testing_mode():
     assert TEST is True
 
 
+def test_diary_save_new():
+    doc = {"title": "test_diary_save_new", "dateCreated": "TODO: need Date()",
+           "entries": []}
+    diary = Diary(doc)
+
+    # before save, make sure not in db
+    assert diary.collection.find_one({"title": "test_diary_save_new"}) is None
+
+    diary.save()
+    res = diary.collection.find_one({"title": "test_diary_save_new"})
+    assert res is not None
+    for item in res:
+        assert item in diary
+
+
+
 def test_diary_reload():
     diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
     d_id = "5ececfbc28f47f5e4408ca45"
