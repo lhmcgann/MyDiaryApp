@@ -40,15 +40,27 @@ class Model(dict):
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
     cluster = pymongo.MongoClient(uri, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
-    db = cluster["myDiaryApp"]
+    dbStr = "myDiaryApp"
+    db = cluster[dbStr]
     collection = db["entries"]
+
+    # def __init__(self, db="myDiaryApp"):
+    #     self.db = db
+    #     self.collection = Entry.cluster[db]["entries"]
+
+    def setDB(self, db):
+        Entry.dbStr = db
+        Entry.db = Entry.cluster[db]
+        Entry.collection = Entry.db["entries"]
 
     def save(self):
         diary = self.get_diary()                 # the filled Diary obj
+        print("DIARY: " + str(diary))
         if not diary:
             return False
         super.save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
+        print("ENTRY: " + str(entry))
         if not entry:                       # if new entry
             # TODO: does this change in db or just local var?
             diary["entries"].append(ObjectId(self._id))
@@ -72,13 +84,14 @@ class Entry(Model):
     def get_diary(self):
         res = None
         if self.d_id:           # if diary id (so diary should exist)
-            diary = Diary({"_id": d_id})
+            diary = Diary({"_id": self.d_id})
+            diary.setDB(self.dbStr)
             res = diary.reload()
         return res
 
     # for internal use mostly (see above save)
     def find_entry_in_diary(self, diary):
-        if diary:
+        if diary: #and self._id:
             for id in diary["entries"]:  # entries = [ObjectIds]
                 if self._id is str(id):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
@@ -87,8 +100,17 @@ class Entry(Model):
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
-    db = cluster["myDiaryApp"]
+    dbStr = "myDiaryApp"
+    db = cluster[dbStr]
     collection = db["diaries"]
+
+    # def __init__(self, db="myDiaryApp"):
+    #     self.collection = Diary.cluster[db]["diaries"]
+
+    def setDB(self, db):
+        Diary.dbStr = db
+        Diary.db = Diary.cluster[db]
+        Diary.collection = Diary.db["diaries"]
 
     def find_all(self):
         diaries = list(self.collection.find())
