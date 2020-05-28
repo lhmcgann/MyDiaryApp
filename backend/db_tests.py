@@ -96,6 +96,28 @@ def test_diary_reload():
         assert item in diary
 
 
+def test_entry_get_diary_empty():
+    entry = Entry()
+    assert entry.get_diary() is None
+
+
+def test_entry_get_diary_bad_id():
+    id = ObjectId()
+    entry = Entry({"d_id": id})
+    assert entry.get_diary() is None
+
+
+def test_entry_get_diary_exists():
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    entry = Entry({"d_id": D_ID})
+    res = entry.get_diary()
+    for item in diary:
+        if item == "_id":
+            assert str(diary[item]) == res[item]
+        else:
+            assert diary[item] == res[item]
+
+
 def test_new_entry_no_diary():
     entry = Entry()
     assert entry.save() is False

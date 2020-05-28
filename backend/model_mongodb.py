@@ -78,8 +78,8 @@ class Entry(Model):
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
-            diary.reload()
-            return diary
+            res = diary.reload()
+            return (diary if res else None)
         return None
 
     # for internal use mostly (see above save)
