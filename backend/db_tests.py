@@ -40,6 +40,29 @@ def test_new_entry_no_diary():
     assert entry.save() is False
 
 
+def test_new_entry_with_diary():
+    d_id = "5ececfbc28f47f5e4408ca45"
+    doc = {"d_id": d_id, "tags": [], "textBody": "blah",
+           "title": "test_new_entry_with_diary"}
+    entry = Entry(doc)
+
+    assert entry.save() is True
+
+    res = entry.collection.find_one({"title": "test_new_entry_with_diary"})
+    assert res is not None
+    assert "d_id" not in res
+
+    # check all other items made it into db
+    del doc["d_id"]
+    for item in doc:
+        assert item in res
+
+    # check entry _id got into diary's entries array
+    diary = Diary({"_id": d_id})
+    diary.reload()
+    assert res["_id"] in diary["entries"]
+
+
 def test_diary_reload_dne():
     diary = Diary()
     assert diary.reload() is False

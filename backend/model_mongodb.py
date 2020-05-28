@@ -19,8 +19,10 @@ class Model(dict):
         if not self._id:
             self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
+            id = self["_id"]
             del self["_id"]
             self.collection.update_one({"_id": ObjectId(self._id)}, {'$set': self})
+            self["_id"] = id
         self._id = str(self._id)
 
     def reload(self):
@@ -50,12 +52,12 @@ class Entry(Model):
         diary = self.get_diary()                 # the filled Diary obj
         if not diary:
             return False
+        del self["d_id"]
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
         if not entry:                       # if new entry
-            # TODO: does this change in db or just local var?
-            diary["entries"].append(ObjectId(self._id))
-            diary.save()
+            diary.collection.update_one({'_id': ObjectId(diary._id)},
+                                        {'$push': {'entries': ObjectId(self._id)}})
             return True
         return False
 
