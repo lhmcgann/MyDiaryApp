@@ -40,6 +40,7 @@ class Model(dict):
             resp = self.collection.delete_one({"_id": ObjectId(self._id)})
             self.clear()
             return resp
+        return None
 
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
@@ -69,11 +70,13 @@ class Entry(Model):
         return False
 
     def remove(self):
-        diary = get_diary()     # the filled Diary obj
-        if diary:               # remove id from diary's entries array
-            diary.collection.update_one({'_id': diary._id},
-                                        {'$pull': {'entries': ObjectId(self._id)}})
-        return super(Entry, self).remove()   # remove from entries collection
+        diary = self.get_diary()             # the filled Diary obj
+        if self.find_entry_in_diary(diary):  # remove id from diary's entries
+            diary["entries"].remove(ObjectId(self._id))
+            diary.save()
+            return super(Entry, self).remove()  # remove from entries collection
+        else:
+            return None
 
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)

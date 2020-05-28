@@ -159,19 +159,20 @@ def test_find_entry_in_diary_found():
     assert res == from_db
 
 
-def test_new_entry_no_diary():
+def test_entry_save_no_diary():
     entry = Entry()
     assert entry.save() is False
 
 
-def test_new_entry_with_diary():
+def test_entry_save_new_with_diary():
+    title = "test_new_entry_with_diary"
     doc = {"d_id": D_ID, "tags": [], "textBody": "blah",
-           "title": "test_new_entry_with_diary"}
+           "title": title}
     entry = Entry(doc)
 
     assert entry.save() is True
 
-    res = entry.collection.find_one({"title": "test_new_entry_with_diary"})
+    res = entry.collection.find_one({"title": title})
     assert res is not None
     assert "d_id" not in res
 
@@ -184,6 +185,55 @@ def test_new_entry_with_diary():
     diary = Diary({"_id": D_ID})
     diary.reload()
     assert res["_id"] in diary["entries"]
+
+
+def test_entry_remove_no_diary():
+    entry = Entry()
+    assert entry.remove() is None
+
+
+def test_entry_remove_no_id():
+    entry = Entry({"d_id": D_ID})
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    num = len(diary["entries"])
+    assert entry.remove() is None
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    num2 = len(diary["entries"])
+    assert num == num2
+
+
+def test_entry_remove_id_dne():
+    entry = Entry({"d_id": D_ID, "_id": str(ObjectId())})
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    num = len(diary["entries"])
+    assert entry.remove() is None
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    num2 = len(diary["entries"])
+    assert num == num2
+
+
+def test_entry_remove_id_valid():
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    num = len(diary["entries"])
+
+    title = "test_new_entry_with_diary"
+    doc = Entry.collection.find_one({"title": title})
+    assert doc is not None
+    id = doc['_id']
+    assert id in diary["entries"]
+
+    entry = Entry({"d_id": D_ID, "_id": str(id)})
+    res = entry.remove()
+    assert res is not None
+    assert res.deleted_count == 1
+
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    num2 = len(diary["entries"])
+    assert num == (num2 + 1)
+    assert id not in diary["entries"]
 
 
 # uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\
