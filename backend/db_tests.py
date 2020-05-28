@@ -27,6 +27,21 @@ def test_diary_save_new():
         assert item in diary
 
 
+# removes the diary inserted in test_diary_save_new to test and help reset
+def test_diary_remove():
+    title = "test_diary_save_new"
+    res = Diary.collection.find_one({"title": title})
+    assert res is not None
+
+    id = res["_id"]
+    assert isinstance(id, ObjectId)
+    id = str(id)
+    assert isinstance(id, str)
+
+    diary = Diary({"_id": id})
+    diary.remove()
+    assert (diary == {}) is True
+
 
 def test_diary_reload():
     diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
