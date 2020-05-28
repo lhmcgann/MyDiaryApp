@@ -118,6 +118,47 @@ def test_entry_get_diary_exists():
             assert diary[item] == res[item]
 
 
+def test_find_entry_in_none_diary():
+    entry = Entry()
+    res = entry.find_entry_in_diary(None)
+    assert res is None
+
+
+def test_find_entry_in_diary_no_id():
+    entry = Entry()
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    res = entry.find_entry_in_diary(diary)
+    assert res is None
+
+
+def test_find_entry_in_diary_not_found():
+    entry = Entry({"_id": ObjectId()})
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    res = entry.find_entry_in_diary(diary)
+    assert res is None
+
+
+def test_find_entry_in_diary_found():
+    title = "test_find_entry_in_diary_found"
+    doc = {"title": title, "tags": [], "textBody": "nothing",
+           "dateCreated": "TODO"}
+    Entry.collection.insert_one(doc)
+    from_db = Entry.collection.find_one({"title": title})
+    assert from_db is not None
+
+    id = from_db["_id"]
+    Diary.collection.update_one({"_id": ObjectId(D_ID)},
+                                {'$push': {'entries': id}})
+
+    entry = Entry({"_id": str(id)})
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    res = entry.find_entry_in_diary(diary)
+    assert res == from_db
+
+
 def test_new_entry_no_diary():
     entry = Entry()
     assert entry.save() is False

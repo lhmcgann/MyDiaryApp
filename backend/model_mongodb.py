@@ -83,10 +83,12 @@ class Entry(Model):
         return None
 
     # for internal use mostly (see above save)
+    # This entry's _id doesn't need to be a valid entry. This function only
+    #   checks if the specified _id is in the given diary JSON object.
     def find_entry_in_diary(self, diary):
-        if diary: #and self._id:
+        if diary and self._id:
             for id in diary["entries"]:  # entries = [ObjectIds]
-                if self._id is str(id):
+                if self._id == str(id):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
