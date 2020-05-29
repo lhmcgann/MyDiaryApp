@@ -6,6 +6,7 @@ from model_mongodb import *
 # the ObjectId of the diary in the tests collection
 D_ID = "5ececfbc28f47f5e4408ca45"
 
+
 # TEST is a boolean const set in model_mongodb
 def test_setup():
     assert TEST is True
@@ -61,6 +62,38 @@ def test_diary_save_old():
     assert res["dateCreated"] == newDate
 
 
+def test_diary_reload_no_id():
+    diary = Diary()
+    assert diary.reload() is False
+
+    d2 = Diary({"random field": "random value"})
+    assert diary.reload() is False
+
+
+def test_diary_reload_bad_id():
+    d2 = Diary({"_id": ObjectId()})
+    assert d2.reload() is False
+
+
+def test_diary_reload():
+    diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
+    diary = Diary({"_id": D_ID})
+    assert diary.reload() is True
+    assert isinstance(diary["_id"], str) is True
+    for item in diary_model:
+        assert item in diary
+
+
+def test_diary_remove_no_id():
+    diary = Diary()
+    assert diary.remove() is None
+
+
+def test_diary_remove_bad_id():
+    diary = Diary({"_id": ObjectId()})
+    assert diary.remove().deleted_count == 0
+
+
 # removes the diary inserted in test_diary_save_new to test and help reset
 def test_diary_remove():
     title = "test_diary_save_new"
@@ -76,23 +109,6 @@ def test_diary_remove():
     assert (diary == {}) is False
     diary.remove()
     assert (diary == {}) is True
-
-
-def test_diary_reload_dne():
-    diary = Diary()
-    assert diary.reload() is False
-
-    d2 = Diary({"random field": "random value"})
-    assert diary.reload() is False
-
-
-def test_diary_reload():
-    diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
-    diary = Diary({"_id": D_ID})
-    assert diary.reload() is True
-    assert isinstance(diary["_id"], str) is True
-    for item in diary_model:
-        assert item in diary
 
 
 def test_entry_get_diary_empty():
@@ -159,21 +175,15 @@ def test_find_entry_in_diary_found():
     res = entry.find_entry_in_diary(diary)
     assert res == from_db
 
-    # print("ENTRY: " + str(entry))
-    # entry["d_id"] = D_ID
-    # entry.reload()
-    # print("ENTRY: " + str(entry))
-    # entry.remove()  # cleanup
-
 
 def test_entry_save_no_diary():
     entry = Entry()
-    assert entry.save() is False
+    assert entry.save() is None  # None means error, nothing happened
 
 
 def test_entry_save_new_with_diary():
     title = "test_new_entry_with_diary"
-    doc = {"d_id": D_ID, "tags": [], "textBody": "blah",
+    doc = {"d_id": D_ID, "tags": [], "textBody": "This is the OG text.",
            "title": title}
     entry = Entry(doc)
 
@@ -192,6 +202,35 @@ def test_entry_save_new_with_diary():
     diary = Diary({"_id": D_ID})
     diary.reload()
     assert res["_id"] in diary["entries"]
+
+
+def test_entry_save_old_with_diary():
+    title = "test_new_entry_with_diary"
+    from_db = Entry.collection.find_one({"title": title})
+    assert from_db is not None
+    id = str(from_db["_id"])
+
+    entry = Entry({"_id": id, "d_id": D_ID})
+    entry.reload()
+    assert entry["textBody"] == "This is the OG text."
+
+    entry["d_id"] = D_ID
+    entry["textBody"] = "this is the NEW text"
+    assert entry.save() is False  # False means updated existing
+
+    res = entry.collection.find_one({"title": title})
+    assert res is not None
+    assert "d_id" not in res
+    assert entry["textBody"] == "this is the NEW text"
+
+    # check entry _id NOT added again into diary's entries array
+    diary = Diary({"_id": D_ID})
+    diary.reload()
+    count = 0
+    for id in diary["entries"]:
+        if (id == res["_id"]):
+            count = count + 1
+    assert count == 1
 
 
 def test_entry_reload_no_id():
@@ -235,7 +274,7 @@ def test_entry_remove_no_id():
     assert num == num2
 
 
-def test_entry_remove_id_dne():
+def test_entry_remove_bad_id():
     entry = Entry({"d_id": D_ID, "_id": str(ObjectId())})
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
@@ -296,11 +335,6 @@ def test_end():
     assert len(diary["entries"]) == 0
     assert Entry.collection.find_one({}) is None
 
-
-# uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\
-#     tryWrites=true&w=majority'
-# db = pymongo.MongoClient(uri)["myDiaryApp"]
-# d_collection = db["diaries"]
 
 # def test_find_all_diaries():
 #     num_diaries = len(d_collection.find())

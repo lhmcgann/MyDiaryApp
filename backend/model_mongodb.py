@@ -50,10 +50,11 @@ class Entry(Model):
     db = cluster[dbStr]
     collection = db["entries"]
 
+    # return: None if failed, True if inserted new, False if updated existing
     def save(self):
         diary = self.get_diary()                 # the filled Diary obj
         if not diary:
-            return False
+            return None
         del self["d_id"]
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
