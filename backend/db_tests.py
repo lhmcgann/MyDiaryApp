@@ -3,8 +3,7 @@ import pymongo
 from bson import ObjectId
 from model_mongodb import *
 
-
-# TODO: figure out how to reset after tests to make it more reliable/indp
+# the ObjectId of the diary in the tests collection
 D_ID = "5ececfbc28f47f5e4408ca45"
 
 # TEST is a boolean const set in model_mongodb
@@ -195,6 +194,31 @@ def test_entry_save_new_with_diary():
     assert res["_id"] in diary["entries"]
 
 
+def test_entry_reload_no_id():
+    entry = Entry()
+    assert entry.reload() is False
+
+
+def test_entry_reload_bad_id():
+    entry = Entry({"_id": ObjectId()})
+    assert entry.reload() is False
+
+
+def test_entry_reload():
+    title = "test_find_entry_in_diary_found"
+    from_db = Entry.collection.find_one({"title": title})
+    assert from_db is not None
+    id = str(from_db["_id"])
+    entry = Entry({"_id": id})
+    assert entry.reload() is True
+    for item in from_db:
+        assert item in entry
+        if item == "_id":
+            assert str(from_db[item]) == entry[item]
+        else:
+            assert from_db[item] == entry[item]
+
+
 def test_entry_remove_no_diary():
     entry = Entry()
     assert entry.remove() is None
@@ -244,11 +268,33 @@ def test_entry_remove_id_valid():
     assert id not in diary["entries"]
 
 
+def test_entry_remove_2():
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    assert diary is not None
+    num = len(diary["entries"])
+
+    title = "test_find_entry_in_diary_found"
+    from_db = Entry.collection.find_one({"title": title})
+    assert from_db is not None
+    id = from_db["_id"]
+    assert id in diary["entries"]
+
+    entry = Entry({"_id": str(id), "d_id": D_ID})
+    res = entry.remove()
+    assert res is not None
+    assert res.deleted_count == 1
+
+    diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
+    num2 = len(diary["entries"])
+    assert num == (num2 + 1)
+    assert id not in diary["entries"]
+
+
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
     assert len(diary["entries"]) == 0
-    assert Entry.collection.find_many({}) is None
+    assert Entry.collection.find_one({}) is None
 
 
 # uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?re\

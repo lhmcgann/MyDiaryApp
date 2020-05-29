@@ -63,12 +63,6 @@ class Entry(Model):
             return True
         return False
 
-    def reload(self):
-        if self.d_id:                  # if diary in the db
-            self.remove("d_id", None)  # real entry doesn't need diary id field
-            return super(Entry, self).reload()
-        return False
-
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
