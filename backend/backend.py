@@ -16,9 +16,9 @@ diaries = []
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
     if request.method == "GET":
-        # diaries = Diary().find_all()
-        # return {"diaries": diaries}, 200
-        return jsonify([diary.__dict__ for diary in diaries]), 200
+        diaries = Diary().find_all()
+        return {"diaries": diaries}, 200
+        # return jsonify([diary.__dict__ for diary in diaries]), 200
     elif request.method == 'POST':
         # diaryToAdd = request.get_json()
         # newDiary = Diary(diaryToAdd)
