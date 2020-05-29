@@ -111,7 +111,7 @@ def test_diary_remove():
     assert (diary == {}) is True
 
 
-def test_entry_get_diary_empty():
+def test_entry_get_diary_no_id():
     entry = Entry()
     assert entry.get_diary() is None
 
@@ -122,7 +122,7 @@ def test_entry_get_diary_bad_id():
     assert entry.get_diary() is None
 
 
-def test_entry_get_diary_exists():
+def test_entry_get_diary():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     entry = Entry({"d_id": D_ID})
     res = entry.get_diary()
@@ -139,7 +139,7 @@ def test_find_entry_in_none_diary():
     assert res is None
 
 
-def test_find_entry_in_diary_no_id():
+def test_find_entry_in_diary_no_entry_id():
     entry = Entry()
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
@@ -263,6 +263,17 @@ def test_entry_remove_no_diary():
     assert entry.remove() is None
 
 
+def test_entry_remove_bad_diary():
+    # get valid entry _id
+    title = "test_new_entry_with_diary"
+    from_db = Entry.collection.find_one({"title": title})
+    assert from_db is not None
+    id = str(from_db["_id"])
+
+    entry = Entry({"_id": id, "d_id": ObjectId()})
+    assert entry.remove() is None
+
+
 def test_entry_remove_no_id():
     entry = Entry({"d_id": D_ID})
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
@@ -285,7 +296,7 @@ def test_entry_remove_bad_id():
     assert num == num2
 
 
-def test_entry_remove_id_valid():
+def test_entry_remove_valid():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
     num = len(diary["entries"])
