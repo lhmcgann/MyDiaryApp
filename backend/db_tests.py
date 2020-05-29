@@ -3,6 +3,7 @@ import pymongo
 from bson import ObjectId
 from model_mongodb import *
 
+
 # the ObjectId of the diary in the tests collection
 D_ID = "5ececfbc28f47f5e4408ca45"
 
