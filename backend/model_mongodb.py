@@ -5,6 +5,7 @@ from bson import ObjectId
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
+
 class Model(dict):
     """
     A simple model that wraps mongodb document
@@ -37,7 +38,7 @@ class Model(dict):
 
 
 class Entry(Model):
-    cluster = pymongo.MongoClient(uri, ssl=True,ssl_cert_reqs=ssl.CERT_NONE)
+    cluster = pymongo.MongoClient(uri, ssl=True, ssl_cert_reqs=ssl.CERT_NONE)
     db = cluster["myDiaryApp"]
     collection = db["diaries"]
 

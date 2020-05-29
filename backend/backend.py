@@ -25,7 +25,7 @@ def retrieve_diaries():
         # newDiary.save()
         title = request.args.get("title")
         if title is None:
-            abort(400, "need to submit a title") 
+            abort(400, "need to submit a title")
 
         newDiary = model.Diary(title)
         diaries.append(newDiary)
@@ -56,7 +56,7 @@ def retrieve_diary(diaryId):
 
     elif request.method == "DELETE":
 
-        for i,d in enumerate(diaries):
+        for i, d in enumerate(diaries):
             if d.id == diaryId:
                 del diaries[i]
 
@@ -64,11 +64,6 @@ def retrieve_diary(diaryId):
 
     else:
         abort(404, "not found")
-
-
-
-
-
 
 
 # this needs to be done properly; still just copy pasted
