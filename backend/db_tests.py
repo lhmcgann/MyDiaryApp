@@ -12,6 +12,14 @@ D_ID = "5ececfbc28f47f5e4408ca45"
 def test_setup():
     TEST = True
     assert TEST is True
+
+    Entry.dbStr = Diary.dbStr = "tests"
+    Entry.db = Entry.cluster[Entry.dbStr]
+    Entry.collection = Entry.db["entries"]
+    Diary.db = Diary.cluster[Diary.dbStr]
+    Diary.collection = Diary.db["diaries"]
+
+    assert Entry.collection.find_one({}) is None
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
 
 
@@ -347,6 +355,12 @@ def test_end():
     assert diary is not None
     assert len(diary["entries"]) == 0
     assert Entry.collection.find_one({}) is None
+
+    Entry.dbStr = Diary.dbStr = "myDiaryApp"
+    Entry.db = Entry.cluster[Entry.dbStr]
+    Entry.collection = Entry.db["entries"]
+    Diary.db = Diary.cluster[Diary.dbStr]
+    Diary.collection = Diary.db["diaries"]
 
     assert TEST is True
     TEST = False
