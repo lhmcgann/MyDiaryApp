@@ -10,6 +10,7 @@ D_ID = "5ececfbc28f47f5e4408ca45"
 
 # TEST is a boolean const set in model_mongodb
 def test_setup():
+    TEST = True
     assert TEST is True
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
 
@@ -346,6 +347,10 @@ def test_end():
     assert diary is not None
     assert len(diary["entries"]) == 0
     assert Entry.collection.find_one({}) is None
+
+    assert TEST is True
+    TEST = False
+    assert TEST is False
 
 
 # def test_find_all_diaries():

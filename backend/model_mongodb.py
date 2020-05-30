@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
-TEST = True
+TEST = False
 
 
 class Model(dict):
