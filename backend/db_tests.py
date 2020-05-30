@@ -8,11 +8,8 @@ from model_mongodb import *
 D_ID = "5ececfbc28f47f5e4408ca45"
 
 
-# TEST is a boolean const set in model_mongodb
 def test_setup():
-    TEST = True
-    assert TEST is True
-
+    # enter "test mode": use testing db
     Entry.dbStr = Diary.dbStr = "tests"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
@@ -356,15 +353,12 @@ def test_end():
     assert len(diary["entries"]) == 0
     assert Entry.collection.find_one({}) is None
 
+    # set references back to main db
     Entry.dbStr = Diary.dbStr = "myDiaryApp"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
-
-    assert TEST is True
-    TEST = False
-    assert TEST is False
 
 
 # def test_find_all_diaries():

@@ -4,7 +4,6 @@ from pymongo import MongoClient
 from bson import ObjectId
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
-TEST = False
 
 
 class Model(dict):
@@ -46,7 +45,7 @@ class Model(dict):
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
     cluster = pymongo.MongoClient(uri, ssl=True, tlsAllowInvalidCertificates=False)
-    dbStr = ("tests" if TEST else "myDiaryApp")
+    dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["entries"]
 
@@ -93,7 +92,7 @@ class Entry(Model):
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
-    dbStr = ("tests" if TEST else "myDiaryApp")
+    dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["diaries"]
 
