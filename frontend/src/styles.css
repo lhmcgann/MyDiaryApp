@@ -34,6 +34,9 @@
   text-decoration: none;
 
 }
+.textbox{
+  white-space: pre-line;
+}
 .tag{
   margin: 5;
 }

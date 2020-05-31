@@ -1,14 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
-// import Button from "react-bootstrap/Button";
 import "bootstrap/dist/css/bootstrap.min.css";
 const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
-      <Link className="entry-block" to={`/entry/${row.title}`}>
+      <Link className="entry-block" to={{pathname:
+        `/entry/${row._id}`,
+      }}>
         {row.title}
-        <br />
-        {row.date}
       </Link>
     );
   });

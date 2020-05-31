@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 class DiaryButton extends Component {
   initialState = {
-    // key: Math.random().toString(36).substring(1),
-    // might need to call new Date in submitForm instead so more accurately reps when diary created
-    dateCreated: new Date().toUTCString(),
-    entries: [],
     title: "",
   };
 
