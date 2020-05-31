@@ -24,7 +24,7 @@ class Diary:
 
     def json(self):
         jsonObject = self.__dict__
-        jsonObject["entries"] = [entry.__dict__ for entry in jsonObject["entries"]]
+        jsonObject["entries"] = [entry.__dict__ if isinstance(entry, Entry) else entry for entry in jsonObject["entries"]]
         return jsonObject
 
     def removeEntry(self, entryId):
