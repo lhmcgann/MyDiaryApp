@@ -99,13 +99,13 @@ class Diary(Model):
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
-            diary = make_printable(diary)
+            diary = self.make_printable(diary)
         return diaries
 
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change ObjectIDs to strs
-            diary = make_printable(diary)
+            diary = self.make_printable(diary)
         return diaries
 
     def make_printable(self, diary):
