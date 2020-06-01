@@ -5,7 +5,7 @@ const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
       <Link className="entry-block" to={{pathname:
-        `/entry/${row._id}`,
+        `/entry/${row.id}`,
       }}>
         {row.title}
       </Link>
@@ -16,7 +16,6 @@ const EntryListBody = (props) => {
 };
 const EntryList = (props) => {
   const { entryData } = props;
-
   return (
     <table>
       <EntryListBody entryData={entryData} />
