@@ -4,9 +4,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
-      <Link className="entry-block" to={{pathname:
-        `/entry/${row.id}`,
-      }}>
+      <Link className="entry-block" to={
+        `${window.location.pathname}/entries/${row.id}`}>
         {row.title}
       </Link>
     );

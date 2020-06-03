@@ -3,7 +3,9 @@ import DiaryList from "./DiaryList";
 import DiaryButton from "./DiaryButton";
 import axios from "axios";
 class Home extends Component {
+
   state = { characters: [] };
+
   componentDidMount() {
     axios
       .get("http://localhost:5000/diaries")
@@ -16,20 +18,20 @@ class Home extends Component {
         console.log(error);
       });
   }
-  handleSubmit = (character) => {
-    this.makePostCall(character).then((callResult) => {
-      if (callResult === true) {
-        this.setState({ characters: [...this.state.characters, character] });
+  handleSubmit = (title) => {
+    this.makePostCall(title).then((callResult) => {
+      if (callResult !== false) {
+        this.setState({ characters: [...this.state.characters, callResult] });
       }
     });
   };
-  makePostCall(character) {
+  makePostCall(title) {
     return axios
-      .post("http://localhost:5000/diaries", character)
+      .post("http://localhost:5000/diaries", title)
       .then(function (response) {
         console.log(response);
         response.status = 201;
-        return true;
+        return response.data;
       })
       .catch(function (error) {
         console.log(error);

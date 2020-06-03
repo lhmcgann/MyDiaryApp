@@ -34,9 +34,9 @@ diaries.append(diary1)
 
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
-    if request.method == "GET":
-        # diaries = Diary().find_all()
-        # return {"diaries": diaries}, 200
+    if request.method == 'GET':
+        #diaries = Diary().find_all()
+        #return {"diaries": diaries}, 200
         return jsonify([diary.json() for diary in diaries]), 200
     elif request.method == 'POST':
         # diaryToAdd = request.get_json()
@@ -99,7 +99,7 @@ def entries(diaryId):
     diary = diary[0]
 
     if request.method == "GET":
-        entries = [entry.__dict__ for entry in diary.entries]
+        entries = [entry for entry in diary.entries]
         return jsonify(entries)
     elif request.method == "POST":
         title = None
@@ -129,7 +129,7 @@ def modifyEntries(diaryId, entryId):
 
     entries = diary.entries
 
-    entry = [entry for entry in entries if entry.id == entryId]
+    entry = [entry for entry in entries if entry["id"] == entryId]
 
     if not len(entry):
         return jsonify(error=404, text="entry not found"), 404
@@ -137,7 +137,7 @@ def modifyEntries(diaryId, entryId):
     entry = entry[0]
 
     if request.method == "GET":
-        return jsonify(entry.__dict__)
+        return jsonify(entry)
     elif request.method == "PUT":
         title = entry.title
         text = entry.text
