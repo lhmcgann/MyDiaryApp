@@ -16,7 +16,7 @@ class ViewEntry extends Component {
       });
   }
 state = {title: '', text: '',};
-handleInputChange(e) {
+handleChange(e) {
     this.setState({
       text :e.target.value
     });
@@ -31,7 +31,7 @@ render() {
     cols="30"
     rows="15"
     value={textBody}
-    onChange={e => this.handleInputChange(e)}
+    onChange={e => this.handleChange(e)}
    />
    </div>
   );
