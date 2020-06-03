@@ -36,6 +36,31 @@ class DiaryHome extends Component {
         return false;
       });
   }
+  makeDeleteCall(character){
+    return axios.delete('http://localhost:5000/diaries/'+this.props.match.params.d_id+
+    "/entries/"+character.id)
+    .then(function (response) {
+      console.log(response);
+      return true;
+    })
+    .catch(function (error) {
+      console.log(error);
+      return false;
+    });
+  }
+  removeCharacter = index => {
+    const {entries} = this.state;
+    const entry = entries[index];
+    this.makeDeleteCall(entry).then((callResult) => {
+      if (callResult !== false){
+        this.setState({
+          entries: entries.filter((entry, i) => {
+            return i !== index
+          }),
+        })
+      }
+    });
+  }
   render() {
     const title = this.state.title;
     const entries = this.state.entries;
@@ -43,7 +68,8 @@ class DiaryHome extends Component {
       <div className="centered">
         <h1>{title}</h1>
             <EntryButton handleSubmit={this.handleSubmit}/>
-            <EntryList entryData={entries}/>
+
+            <EntryList entryData={entries} removeCharacter={this.removeCharacter}/>
       </div>
     );
   }
