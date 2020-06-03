@@ -16,8 +16,8 @@ class DiaryHome extends Component {
         console.log(error);
       });
   }
-  handleSubmit = (entry) => {
-    this.makePostCall(entry).then((callResult) => {
+  handleSubmit = (title) => {
+    this.makePostCall(title).then((callResult) => {
       if (callResult !== false) {
         this.setState({ entries: [...this.state.entries, callResult] });
       }
@@ -25,7 +25,7 @@ class DiaryHome extends Component {
   };
   makePostCall(title) {
     return axios
-      .post("http://localhost:5000/diaries/"+this.props.match.params.id+"/entries", title)
+      .post("http://localhost:5000/diaries/"+this.props.match.params.d_id+"/entries", title)
       .then(function (response) {
         console.log(response);
         response.status = 201;
