@@ -43,6 +43,9 @@ class Entry:
         self.date = datetime.datetime.now()
         self.id = id(self)
 
+    def __getitem__(self, item):
+        if item == 'id':
+            return self.id
     def updateEntry(self, title, tags, text):
         self.title = title
         self.text = text

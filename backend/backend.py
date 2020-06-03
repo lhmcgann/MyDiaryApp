@@ -129,7 +129,7 @@ def modifyEntries(diaryId, entryId):
 
     entries = diary.entries
 
-    entry = [entry for entry in entries if entry["id"] == entryId]
+    entry = [entry for entry in entries if entry['id'] == entryId]
 
     if not len(entry):
         return jsonify(error=404, text="entry not found"), 404
@@ -137,7 +137,7 @@ def modifyEntries(diaryId, entryId):
     entry = entry[0]
 
     if request.method == "GET":
-        return jsonify(entry)
+        return jsonify(entry.json())
     elif request.method == "PUT":
         title = entry.title
         text = entry.text
