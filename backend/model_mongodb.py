@@ -89,6 +89,20 @@ class Entry(Model):
         return None
 
 
+class Tag(Model):
+    cluster = pymongo.MongoClient(uri)
+    dbStr = "myDiaryApp"
+    db = cluster[dbStr]
+    collection = db["tags"]
+
+    # there should not de tags with the same title --> can use title to get
+    def find_by_title(self, title):
+        tags = list(self.collection.find({"title": title}))
+        for tag in tags:
+            tag["_id"] = str(tag["_id"])
+        return tags
+
+
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
     dbStr = "myDiaryApp"
@@ -106,6 +120,10 @@ class Diary(Model):
         for diary in diaries:  # change ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
+
+    # tags is a string array of tag names
+    def find_by_at_least_one_tag(self, tags):
+        return None
 
     def make_printable(self, diary):
         diary["_id"] = str(diary["_id"])

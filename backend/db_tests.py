@@ -10,11 +10,13 @@ D_ID = "5ececfbc28f47f5e4408ca45"
 
 def test_setup():
     # enter "test mode": use testing db
-    Entry.dbStr = Diary.dbStr = "tests"
+    Entry.dbStr = Diary.dbStr = Tag.dbStr = "tests"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
+    Tag.db = Tag.cluster[Tag.dbStr]
+    Tag.collection = Tag.db["tags"]
 
     assert Entry.collection.find_one({}) is None
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
@@ -23,7 +25,7 @@ def test_setup():
 def test_entry_gets_TEST():
     entry = Entry()
     clxns = entry.db.list_collection_names()
-    expect = ["tests", "diaries", "entries"]
+    expect = ["tests", "tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -31,7 +33,7 @@ def test_entry_gets_TEST():
 def test_diary_gets_TEST():
     diary = Diary()
     clxns = diary.db.list_collection_names()
-    expect = ["tests", "diaries", "entries"]
+    expect = ["tests", "tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -341,6 +343,17 @@ def test_entry_remove_2():
     assert id not in diary["entries"]
 
 
+def test_tag_find_by_title_bad():
+    assert Tag().find_by_title("bad title") == []
+
+
+def test_tag_find_by_title():
+    tags = Tag().find_by_title("first tag")
+    assert not tags == []
+    assert len(tags) == 1
+    assert tags[0]['title'] == "first tag"
+
+
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
@@ -348,11 +361,13 @@ def test_end():
     assert Entry.collection.find_one({}) is None
 
     # set references back to main db
-    Entry.dbStr = Diary.dbStr = "myDiaryApp"
+    Entry.dbStr = Diary.dbStr = Tag.dbStr = "myDiaryApp"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
+    Tag.db = Tag.cluster[Tag.dbStr]
+    Tag.collection = Tag.db["tags"]
 
 
 # def test_find_all_diaries():
