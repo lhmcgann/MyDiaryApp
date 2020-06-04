@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-class DiaryButton extends Component {
+class EntryButton extends Component {
   initialState = {
     title: "",
   };
@@ -23,7 +23,7 @@ class DiaryButton extends Component {
 
     return (
       <form>
-        <div className="entry-grid">
+        <div class="entry-grid">
           <label htmlFor="title">Title</label>
           <input
             size="10"
@@ -33,11 +33,11 @@ class DiaryButton extends Component {
             value={title}
             onChange={this.handleChange}
           />
-          <input type="button" value="+ Add Diary" onClick={this.submitForm} />
+          <input type="button" value="+ Add Entry" onClick={this.submitForm} />
         </div>
       </form>
     );
   }
 }
 
-export default DiaryButton;
+export default EntryButton;
