@@ -9,6 +9,19 @@ class Diary:
         self.dateCreated = datetime.datetime.now()
         self.id = id(self)
 
+    def convertEntryData(self):
+        for entry in range(len(self.entries)):
+            oldEntry = self.entries[entry]
+            if isinstance(oldEntry, Entry):
+                newEntry = {}
+                newEntry['title'] = oldEntry.title
+                newEntry['tags'] = oldEntry.tags
+                newEntry['text']= oldEntry.text
+                newEntry['date'] = oldEntry.date
+                newEntry['id'] = oldEntry.id
+                self.entries[entry] = newEntry
+        return self.entries
+
     def sortEntriesMostRecent(self):
         return [entry.__dict__ for entry in sorted(this.entries, key=lambda entry: entry.dateCreated, reverse=True)]
 
@@ -29,7 +42,7 @@ class Diary:
 
     def removeEntry(self, entryId):
         for i, entry in enumerate(self.entries):
-            if entry.id == entryId:
+            if entry['id'] == entryId:
                 del self.entries[i]
                 break
 
@@ -43,9 +56,6 @@ class Entry:
         self.date = datetime.datetime.now()
         self.id = id(self)
 
-    def __getitem__(self, item):
-        if item == 'id':
-            return self.id
     def updateEntry(self, title, tags, text):
         self.title = title
         self.text = text
