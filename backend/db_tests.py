@@ -198,12 +198,9 @@ def test_entry_save_new_with_diary():
 
     res = entry.collection.find_one({"title": title})
     assert res is not None
-    assert "d_id" not in res
-
-    # check all other items made it into db
-    del doc["d_id"]
     for item in doc:
         assert item in res
+        assert doc[item] == res[item]
 
     # check entry _id got into diary's entries array
     diary = Diary({"_id": D_ID})
@@ -220,14 +217,11 @@ def test_entry_save_old_with_diary():
     entry = Entry({"_id": id, "d_id": D_ID})
     entry.reload()
     assert entry["textBody"] == "This is the OG text."
-
-    entry["d_id"] = D_ID
     entry["textBody"] = "this is the NEW text"
     assert entry.save() is False  # False means updated existing
 
     res = entry.collection.find_one({"title": title})
     assert res is not None
-    assert "d_id" not in res
     assert entry["textBody"] == "this is the NEW text"
 
     # check entry _id NOT added again into diary's entries array
