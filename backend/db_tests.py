@@ -354,6 +354,34 @@ def test_tag_find_by_title():
     assert tags[0]['title'] == "first tag"
 
 
+def test_add_tag_no_eid():
+    assert Entry().add_tag("valid tag") is False
+
+
+def test_add_tag_bad_eid():
+    assert Entry({"_id": str(ObjectId())}).add_tag("valid tag") is False
+
+
+def test_add_tag():
+    e_doc = {"title": "test_add_tag", "tags": [], "dateCreated": "TODO",
+             "textBody": "nada mucho", "d_id": D_ID}
+    entry = Entry(e_doc)
+    entry.save()
+    entry.reload()
+    assert entry is not None
+    assert "_id" in entry
+    assert len(entry["tags"]) == 0
+    assert entry.add_tag("valid tag") is True
+    assert len(entry["tags"]) == 1
+
+    tag_id = str(entry["tags"][0])  # actual ObjectId rn; TODO: should be a str
+    tag = Tag({"_id": tag_id})
+    assert tag.reload() is True
+    assert tag["title"] == "valid tag"
+
+    assert entry.remove() is not None  # cleanup for testing
+
+
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None

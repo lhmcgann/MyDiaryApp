@@ -29,7 +29,8 @@ class Model(dict):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
-                self.update(result)  # updates created Diary (w/ id) to full doc
+                self.update(result)  # updates created doc (w/ id) to full doc
+                # TODO: call a make_printable() function?
                 self._id = str(self._id)  # may also need to convert entry ids
                 return True
         return False
@@ -87,6 +88,16 @@ class Entry(Model):
                 if self._id == str(id):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
+
+    # title is the unique tag title which should already exist in db
+    def add_tag(self, title):
+        if self._id and self.reload():
+            tags = Tag().find_by_title(title)
+            tag = tags[0]       # there should only be one bc unique title
+            self["tags"].append(tag["_id"])
+            self.save()
+            return True
+        return False
 
 
 class Tag(Model):
