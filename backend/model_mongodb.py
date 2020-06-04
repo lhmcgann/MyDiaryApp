@@ -54,7 +54,6 @@ class Entry(Model):
         diary = self.get_diary()                 # the filled Diary obj
         if not diary:
             return None
-        del self["d_id"]
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
         if not entry:                       # if new entry
