@@ -90,7 +90,7 @@ class Entry(Model):
 
     def make_printable(self, entry):
         entry["_id"] = str(entry["_id"])
-        # entry["d_id"] = str(entry["d_id"])
+        entry["d_id"] = str(entry["d_id"])
         tags = entry["tags"]
         for i in range(len(tags)):
             tags[i] = str(tags[i])

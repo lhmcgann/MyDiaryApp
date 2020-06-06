@@ -167,7 +167,7 @@ def test_find_entry_in_diary_not_found():
 def test_find_entry_in_diary_found():
     title = "test_find_entry_in_diary_found"
     doc = {"title": title, "tags": [], "textBody": "nothing",
-           "dateCreated": "TODO"}
+           "dateCreated": "TODO", "d_id": D_ID}
     # put entry in db (to give it an _id) and then find in db
     Entry.collection.insert_one(doc)
     from_db = Entry.collection.find_one({"title": title})
