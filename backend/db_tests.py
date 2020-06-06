@@ -366,7 +366,7 @@ def test_add_tag_bad_eid():
     assert Entry({"_id": str(ObjectId())}).add_tag("valid tag") is False
 
 
-def test_add_tag():
+def test_add_tag_existing():
     e_doc = {"title": "test_add_tag", "tags": [], "dateCreated": "TODO",
              "textBody": "nada mucho", "d_id": D_ID}
     entry = Entry(e_doc)
@@ -382,6 +382,26 @@ def test_add_tag():
     tag = Tag({"_id": tag_id})
     assert tag.reload() is True
     assert tag["title"] == "valid tag"
+
+
+def test_add_tag_new():
+    title = "test_add_tag"
+    res = Entry.collection.find({"title": title})
+    assert res is not None
+    id = str(res[0]["_id"])
+
+    entry = Entry({"_id": id})
+    entry.reload()
+    assert isinstance(entry["_id"], str)
+    assert len(entry["tags"]) == 1
+    for tag in entry["tags"]:
+        assert isinstance(tag, str)
+
+    entry.add_tag("new tag")
+    assert len(entry["tags"]) == 2
+    for tag in entry["tags"]:
+        assert isinstance(tag, str)
+    assert len(list(Tag.collection.find({"title": "new tag"}))) == 1
 
     assert entry.remove() is not None  # cleanup for testing
 

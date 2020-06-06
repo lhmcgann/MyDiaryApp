@@ -112,11 +112,15 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
-    # title is the unique tag title which should already exist in db
+    # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
             tags = Tag().find_by_title(title)
-            tag = tags[0]       # there should only be one bc unique title
+            # if new tag, create in db
+            if len(tags) == 0:
+                Tag({"title": title}).save()
+                tags = Tag().find_by_title(title)
+            tag = tags[0]
             self["tags"].append(tag["_id"])
             self.save()
             return True
