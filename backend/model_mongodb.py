@@ -115,12 +115,11 @@ class Entry(Model):
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
-            tags = Tag().find_by_title(title)
+            tag = Tag().find_by_title(title)
             # if new tag, create in db
-            if len(tags) == 0:
+            if tag is None:
                 Tag({"title": title}).save()
-                tags = Tag().find_by_title(title)
-            tag = tags[0]
+                tag = Tag().find_by_title(title)
             self["tags"].append(tag["_id"])
             self.save()
             return True
@@ -128,9 +127,8 @@ class Entry(Model):
 
     def delete_tag(self, title):
         if self._id and self.reload():
-            tags = Tag().find_by_title(title)
-            if len(tags) != 0:
-                tag = Tag(tags[0])
+            tag = Tag().find_by_title(title)
+            if tag is not None:
                 tag.reload()
                 id = tag["_id"]
                 self["tags"].remove(id)
@@ -147,9 +145,10 @@ class Tag(Model):
     # there should not de tags with the same title --> can use title to get
     def find_by_title(self, title):
         tags = list(self.collection.find({"title": title}))
-        for tag in tags:
-            tag = self.make_printable(tag)
-        return tags
+        if len(tags) > 0:
+            tag = self.make_printable(Tag(tags[0]))
+            return tag
+        return None
 
     def make_printable(self, tag):
         tag["_id"] = str(tag["_id"])

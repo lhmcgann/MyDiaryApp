@@ -348,14 +348,14 @@ def test_entry_remove_2():
 
 
 def test_tag_find_by_title_bad():
-    assert Tag().find_by_title("bad title") == []
+    assert Tag().find_by_title("bad title") is None
 
 
 def test_tag_find_by_title():
-    tags = Tag().find_by_title("first tag")
-    assert not tags == []
-    assert len(tags) == 1
-    assert tags[0]['title'] == "first tag"
+    tag = Tag().find_by_title("first tag")
+    assert tag is not None
+    assert tag['title'] == "first tag"
+    assert isinstance(tag["_id"], str)
 
 
 def test_add_tag_no_eid():
@@ -421,7 +421,7 @@ def test_delete_tag_dne():
     assert len(entry["tags"]) == 2
 
     tag_name = "bad tag"
-    assert len(list(Tag().find_by_title(tag_name))) == 0
+    assert Tag().find_by_title(tag_name) is None
     assert entry.delete_tag(tag_name) is None
     assert len(entry["tags"]) == 2
 
@@ -435,10 +435,10 @@ def test_delete_tag():
     assert len(entry["tags"]) == 2
 
     tag_name = "new tag"
-    assert len(list(Tag().find_by_title(tag_name))) == 1
+    assert Tag().find_by_title(tag_name) is not None
     assert entry.delete_tag(tag_name) is not None
     assert len(entry["tags"]) == 1
-    assert len(list(Tag().find_by_title(tag_name))) == 0
+    assert Tag().find_by_title(tag_name) is None
 
     assert entry.remove() is not None  # cleanup for testing
 
