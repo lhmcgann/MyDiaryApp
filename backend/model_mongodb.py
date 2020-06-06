@@ -90,6 +90,7 @@ class Entry(Model):
 
     def make_printable(self, entry):
         entry["_id"] = str(entry["_id"])
+        # entry["d_id"] = str(entry["d_id"])
         tags = entry["tags"]
         for i in range(len(tags)):
             tags[i] = str(tags[i])
@@ -132,6 +133,7 @@ class Entry(Model):
                 tag.reload()
                 id = tag["_id"]
                 self["tags"].remove(id)
+                self.save()
                 return True
                 # return tag.remove() --> don't wan't to actually del from DB!
         return False
@@ -145,9 +147,21 @@ class Tag(Model):
 
     def remove(self):
         if self.title and self.d_id:
-            tag = self.find_by_title(self.title, self.d_id)
-            if not tag:
+            self = self.find_by_title(self.title, self.d_id)
+            if not self:
                 return -1
+            diary = Diary({'_id': self.d_id})
+            diary.reload()
+            count = 0
+            for entry_id in diary['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                if self._id in entry['tags']:
+                    entry['tags'].remove(self._id)
+                    entry.save()
+                    count = count + 1
+            if super(Tag, self).remove():
+                return count
         return None
 
     # shouldn't be tags with same title in same diary --> can use title to get
@@ -160,6 +174,7 @@ class Tag(Model):
 
     def make_printable(self, tag):
         tag["_id"] = str(tag["_id"])
+        tag["d_id"] = str(tag["d_id"])
         return tag
 
 

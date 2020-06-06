@@ -443,13 +443,12 @@ def test_delete_tag():
     assert entry.reload() is True
     assert len(entry["tags"]) == 2
 
-    tag_name = "new tag"
+    tag_name = "valid tag"
     assert Tag().find_by_title(tag_name, entry.d_id) is not None
     assert entry.delete_tag(tag_name) is True
+    entry.reload()
     assert len(entry["tags"]) == 1
     assert Tag().find_by_title(tag_name, entry.d_id) is not None
-
-    assert entry.remove() is not None  # cleanup for testing
 
 
 def test_remove_tag_no_title():
@@ -466,6 +465,24 @@ def test_remove_tag_no_did():
 
 def test_remove_tag_bad_did():
     assert Tag({'title': 'valid tag', 'd_id': ObjectId()}).remove() is -1
+
+
+def test_remove_tag():
+    title = "test_add_tag"
+    res = Entry.collection.find({"title": title})
+    assert res is not None
+    entry = Entry(res[0])
+    assert entry.reload() is True
+    assert len(entry["tags"]) == 1
+
+    tag_name = "new tag"
+    tag = Tag({'title': tag_name, 'd_id': entry.d_id})
+    assert tag.remove() == 1
+    entry.reload()
+    assert len(entry["tags"]) == 0
+    assert Tag().find_by_title(tag_name, entry.d_id) is None
+
+    assert entry.remove() is not None  # cleanup for testing
 
 
 def test_end():
