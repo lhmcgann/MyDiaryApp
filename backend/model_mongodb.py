@@ -115,11 +115,11 @@ class Entry(Model):
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
-            tag = Tag().find_by_title(title)
+            tag = Tag().find_by_title(title, self.d_id)
             # if new tag, create in db
             if tag is None:
                 Tag({"title": title, "d_id": self.d_id}).save()
-                tag = Tag().find_by_title(title)
+                tag = Tag().find_by_title(title, self.d_id)
             self["tags"].append(tag["_id"])
             self.save()
             return True
@@ -127,7 +127,7 @@ class Entry(Model):
 
     def delete_tag(self, title):
         if self._id and self.reload():
-            tag = Tag().find_by_title(title)
+            tag = Tag().find_by_title(title, self.d_id)
             if tag is not None:
                 tag.reload()
                 id = tag["_id"]
@@ -143,9 +143,9 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
-    # there should not de tags with the same title --> can use title to get
-    def find_by_title(self, title):
-        tags = list(self.collection.find({"title": title}))
+    # shouldn't be tags with same title in same diary --> can use title to get
+    def find_by_title(self, title, d_id):
+        tags = list(self.collection.find({"title": title, 'd_id': d_id}))
         if len(tags) > 0:
             tag = self.make_printable(Tag(tags[0]))
             return tag

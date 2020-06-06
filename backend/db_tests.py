@@ -347,12 +347,16 @@ def test_entry_remove_2():
     assert id not in diary["entries"]
 
 
-def test_tag_find_by_title_bad():
-    assert Tag().find_by_title("bad title") is None
+def test_tag_find_by_title_bad_title():
+    assert Tag().find_by_title("bad title", D_ID) is None
+
+
+def test_tag_find_by_title_bad_did():
+    assert Tag().find_by_title("valid title", ObjectId()) is None
 
 
 def test_tag_find_by_title():
-    tag = Tag().find_by_title("first tag")
+    tag = Tag().find_by_title("first tag", D_ID)
     assert tag is not None
     assert tag['title'] == "first tag"
     assert isinstance(tag["_id"], str)
@@ -404,7 +408,7 @@ def test_add_tag_new():
     assert len(entry["tags"]) == 2
     for tag in entry["tags"]:
         assert isinstance(tag, str)
-    tag = Tag().find_by_title(tag_name)
+    tag = Tag().find_by_title(tag_name, entry.d_id)
     assert tag is not None
     assert "d_id" in tag
 
@@ -426,7 +430,7 @@ def test_delete_tag_dne():
     assert len(entry["tags"]) == 2
 
     tag_name = "bad tag"
-    assert Tag().find_by_title(tag_name) is None
+    assert Tag().find_by_title(tag_name, entry.d_id) is None
     assert entry.delete_tag(tag_name) is False
     assert len(entry["tags"]) == 2
 
@@ -440,10 +444,10 @@ def test_delete_tag():
     assert len(entry["tags"]) == 2
 
     tag_name = "new tag"
-    assert Tag().find_by_title(tag_name) is not None
+    assert Tag().find_by_title(tag_name, entry.d_id) is not None
     assert entry.delete_tag(tag_name) is True
     assert len(entry["tags"]) == 1
-    assert Tag().find_by_title(tag_name) is not None
+    assert Tag().find_by_title(tag_name, entry.d_id) is not None
 
     assert entry.remove() is not None  # cleanup for testing
 
