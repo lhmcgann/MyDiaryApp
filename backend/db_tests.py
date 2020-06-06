@@ -452,6 +452,22 @@ def test_delete_tag():
     assert entry.remove() is not None  # cleanup for testing
 
 
+def test_remove_tag_no_title():
+    assert Tag({'d_id': D_ID}).remove() is None
+
+
+def test_remove_tag_bad_title():
+    assert Tag({'title': 'fake', 'd_id': D_ID}).remove() is -1
+
+
+def test_remove_tag_no_did():
+    assert Tag({'title': 'valid tag'}).remove() is None
+
+
+def test_remove_tag_bad_did():
+    assert Tag({'title': 'valid tag', 'd_id': ObjectId()}).remove() is -1
+
+
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None

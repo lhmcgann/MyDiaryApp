@@ -143,6 +143,13 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
+    def remove(self):
+        if self.title and self.d_id:
+            tag = self.find_by_title(self.title, self.d_id)
+            if not tag:
+                return -1
+        return None
+
     # shouldn't be tags with same title in same diary --> can use title to get
     def find_by_title(self, title, d_id):
         tags = list(self.collection.find({"title": title, 'd_id': d_id}))
