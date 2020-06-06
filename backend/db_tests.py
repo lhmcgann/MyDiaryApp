@@ -413,6 +413,70 @@ def test_add_tag_new():
     assert "d_id" in tag
 
 
+def test_save_tag_no_args():
+    count = len(list(Tag.collection.find()))
+    Tag().save()
+    count2 = len(list(Tag.collection.find()))
+    assert count == count2
+
+
+def test_save_tag_bad_did():
+    count = len(list(Tag.collection.find()))
+    tag = Tag({'title': 'first tag', 'd_id': ObjectId()})
+    tag.save()
+    count2 = len(list(Tag.collection.find()))
+    assert count == count2
+
+
+def test_save_tag_old_id():
+    before = Tag({'_id': '5edc2aab2d64f19e729bff38'})  # id of first tag
+    before.reload()
+
+    count = len(list(Tag.collection.find()))
+    tag = Tag({'_id': '5edc2aab2d64f19e729bff38', 'title': 'wrong'})
+    tag.save()
+    tag.reload()
+    count2 = len(list(Tag.collection.find()))
+    assert count == count2
+    assert tag != before
+    assert tag['title'] == 'wrong'
+
+    tag['title'] = 'first tag'
+    tag.save()
+    tag.reload()
+    count2 = len(list(Tag.collection.find()))
+    assert count == count2
+    assert tag == before
+
+
+def test_save_tag_old_title_did():
+    before = Tag({'_id': '5edc2aab2d64f19e729bff38'})  # id of first tag
+    before.reload()
+
+    count = len(list(Tag.collection.find()))
+    tag = Tag({'title': 'first tag', 'd_id': D_ID})
+    tag.save()
+    count2 = len(list(Tag.collection.find()))
+    assert count == count2
+
+    tag.reload()
+    assert tag == before
+
+
+def test_save_tag_new_title():
+    count = len(list(Tag.collection.find()))
+    tag = Tag({'title': 'test_save_tag_new_title', 'd_id': D_ID})
+    tag.save()
+    count2 = len(list(Tag.collection.find()))
+    assert (count+1) == count2
+
+    tag.reload()
+    assert '_id' in tag
+    assert isinstance(tag['_id'], str)
+
+    tag.remove()  # cleanup
+
+
 def test_reload_tag_no_args():
     assert Tag().reload() is False
 

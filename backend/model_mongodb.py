@@ -145,6 +145,24 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
+    def save(self):
+        if self._id:
+            super(Tag, self).save()
+        elif self.title and self.d_id:
+            diary = self.get_diary(self.d_id)
+            if diary:
+                tag = self.find_by_title(self.title, self.d_id)
+                if tag:
+                    self['_id'] = tag['_id']
+                super(Tag, self).save()
+
+    def get_diary(self, diary):
+        if self.d_id:           # if diary id (so diary should exist)
+            diary = Diary({"_id": self.d_id})
+            res = diary.reload()
+            return (diary if res else None)
+        return None
+
     def reload(self):
         if self._id:
             return super(Tag, self).reload()
@@ -183,8 +201,10 @@ class Tag(Model):
         return None
 
     def make_printable(self, tag):
-        tag["_id"] = str(tag["_id"])
-        tag["d_id"] = str(tag["d_id"])
+        if '_id' in tag:
+            tag["_id"] = str(tag["_id"])
+        if 'd_id' in tag:
+            tag["d_id"] = str(tag["d_id"])
         return tag
 
 
