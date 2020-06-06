@@ -200,6 +200,7 @@ def test_entry_save_new_with_diary():
 
     res = entry.collection.find_one({"title": title})
     assert res is not None
+    assert isinstance(res["_id"], ObjectId)
     for item in doc:
         assert item in res
         assert doc[item] == res[item]
@@ -207,7 +208,10 @@ def test_entry_save_new_with_diary():
     # check entry _id got into diary's entries array
     diary = Diary({"_id": D_ID})
     diary.reload()
-    assert res["_id"] in diary["entries"]
+    assert isinstance(diary["_id"], str)
+    for e in diary["entries"]:
+        assert isinstance(e, str)
+    assert str(res["_id"]) in diary["entries"]
 
 
 def test_entry_save_old_with_diary():
@@ -231,7 +235,7 @@ def test_entry_save_old_with_diary():
     diary.reload()
     count = 0
     for id in diary["entries"]:
-        if (id == res["_id"]):
+        if (id == str(res["_id"])):
             count = count + 1
     assert count == 1
 
