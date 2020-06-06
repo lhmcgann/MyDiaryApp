@@ -126,6 +126,17 @@ class Entry(Model):
             return True
         return False
 
+    def delete_tag(self, title):
+        if self._id and self.reload():
+            tags = Tag().find_by_title(title)
+            if len(tags) != 0:
+                tag = Tag(tags[0])
+                tag.reload()
+                id = tag["_id"]
+                self["tags"].remove(id)
+                return tag.remove()
+        return None
+
 
 class Tag(Model):
     cluster = pymongo.MongoClient(uri)

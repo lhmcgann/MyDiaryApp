@@ -403,6 +403,43 @@ def test_add_tag_new():
         assert isinstance(tag, str)
     assert len(list(Tag.collection.find({"title": "new tag"}))) == 1
 
+
+def test_delete_tag_no_eid():
+    assert Entry().delete_tag("valid tag") is None
+
+
+def test_delete_tag_bad_eid():
+    assert Entry({"_id": str(ObjectId())}).delete_tag("valid tag") is None
+
+
+def test_delete_tag_dne():
+    title = "test_add_tag"
+    res = Entry.collection.find({"title": title})
+    assert res is not None
+    entry = Entry(res[0])
+    assert entry.reload() is True
+    assert len(entry["tags"]) == 2
+
+    tag_name = "bad tag"
+    assert len(list(Tag().find_by_title(tag_name))) == 0
+    assert entry.delete_tag(tag_name) is None
+    assert len(entry["tags"]) == 2
+
+
+def test_delete_tag():
+    title = "test_add_tag"
+    res = Entry.collection.find({"title": title})
+    assert res is not None
+    entry = Entry(res[0])
+    assert entry.reload() is True
+    assert len(entry["tags"]) == 2
+
+    tag_name = "new tag"
+    assert len(list(Tag().find_by_title(tag_name))) == 1
+    assert entry.delete_tag(tag_name) is not None
+    assert len(entry["tags"]) == 1
+    assert len(list(Tag().find_by_title(tag_name))) == 0
+
     assert entry.remove() is not None  # cleanup for testing
 
 
