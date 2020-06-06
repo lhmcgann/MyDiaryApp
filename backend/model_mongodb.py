@@ -145,6 +145,16 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
+    def reload(self):
+        if self._id:
+            return super(Tag, self).reload()
+        elif self.title and self.d_id:
+            tag = self.find_by_title(self.title, self.d_id)
+            if tag:
+                self.update(tag)
+                return True
+        return False
+
     def remove(self):
         if self.title and self.d_id:
             self = self.find_by_title(self.title, self.d_id)

@@ -413,6 +413,42 @@ def test_add_tag_new():
     assert "d_id" in tag
 
 
+def test_reload_tag_no_args():
+    assert Tag().reload() is False
+
+
+def test_reload_tag_bad_id():
+    assert Tag({'_id': ObjectId()}).reload() is False
+
+
+def test_reload_tag_no_title():
+    assert Tag({'d_id': D_ID}).reload() is False
+
+
+def test_reload_tag_no_did():
+    assert Tag({'title': 'valid tag'}).reload() is False
+
+
+def test_reload_tag_bad_title():
+    assert Tag({'title': 'bad tag title', 'd_id': D_ID}).reload() is False
+
+
+def test_reload_tag_bad_did():
+    assert Tag({'title': 'valid tag', 'd_id': ObjectId()}).reload() is False
+
+
+def test_reload_tag():
+    tag = Tag({"title": 'valid tag', 'd_id': D_ID})
+    assert tag.reload() is True
+    assert '_id' in tag
+    id = tag['_id']
+    assert isinstance(id, str)
+
+    tag2 = Tag({'_id': id})
+    assert tag2.reload() is True
+    assert tag == tag2
+
+
 def test_delete_tag_no_eid():
     assert Entry().delete_tag("valid tag") is False
 
