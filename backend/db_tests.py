@@ -375,13 +375,15 @@ def test_add_tag_existing():
     assert entry is not None
     assert "_id" in entry
     assert len(entry["tags"]) == 0
-    assert entry.add_tag("valid tag") is True
+
+    tag_name = "valid tag"
+    assert entry.add_tag(tag_name) is True
     assert len(entry["tags"]) == 1
 
     tag_id = str(entry["tags"][0])  # actual ObjectId rn; TODO: should be a str
     tag = Tag({"_id": tag_id})
     assert tag.reload() is True
-    assert tag["title"] == "valid tag"
+    assert tag["title"] == tag_name
 
 
 def test_add_tag_new():
@@ -397,11 +399,14 @@ def test_add_tag_new():
     for tag in entry["tags"]:
         assert isinstance(tag, str)
 
-    entry.add_tag("new tag")
+    tag_name = "new tag"
+    entry.add_tag(tag_name)
     assert len(entry["tags"]) == 2
     for tag in entry["tags"]:
         assert isinstance(tag, str)
-    assert len(list(Tag.collection.find({"title": "new tag"}))) == 1
+    tag = Tag().find_by_title(tag_name)
+    assert tag is not None
+    assert "d_id" in tag
 
 
 def test_delete_tag_no_eid():

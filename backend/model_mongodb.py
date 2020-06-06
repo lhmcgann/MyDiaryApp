@@ -118,7 +118,7 @@ class Entry(Model):
             tag = Tag().find_by_title(title)
             # if new tag, create in db
             if tag is None:
-                Tag({"title": title}).save()
+                Tag({"title": title, "d_id": self.d_id}).save()
                 tag = Tag().find_by_title(title)
             self["tags"].append(tag["_id"])
             self.save()
