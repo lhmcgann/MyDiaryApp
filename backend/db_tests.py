@@ -405,11 +405,11 @@ def test_add_tag_new():
 
 
 def test_delete_tag_no_eid():
-    assert Entry().delete_tag("valid tag") is None
+    assert Entry().delete_tag("valid tag") is False
 
 
 def test_delete_tag_bad_eid():
-    assert Entry({"_id": str(ObjectId())}).delete_tag("valid tag") is None
+    assert Entry({"_id": str(ObjectId())}).delete_tag("valid tag") is False
 
 
 def test_delete_tag_dne():
@@ -422,7 +422,7 @@ def test_delete_tag_dne():
 
     tag_name = "bad tag"
     assert Tag().find_by_title(tag_name) is None
-    assert entry.delete_tag(tag_name) is None
+    assert entry.delete_tag(tag_name) is False
     assert len(entry["tags"]) == 2
 
 
@@ -436,9 +436,9 @@ def test_delete_tag():
 
     tag_name = "new tag"
     assert Tag().find_by_title(tag_name) is not None
-    assert entry.delete_tag(tag_name) is not None
+    assert entry.delete_tag(tag_name) is True
     assert len(entry["tags"]) == 1
-    assert Tag().find_by_title(tag_name) is None
+    assert Tag().find_by_title(tag_name) is not None
 
     assert entry.remove() is not None  # cleanup for testing
 

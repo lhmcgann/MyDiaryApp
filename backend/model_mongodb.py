@@ -132,8 +132,9 @@ class Entry(Model):
                 tag.reload()
                 id = tag["_id"]
                 self["tags"].remove(id)
-                return tag.remove()
-        return None
+                return True
+                # return tag.remove() --> don't wan't to actually del from DB!
+        return False
 
 
 class Tag(Model):
