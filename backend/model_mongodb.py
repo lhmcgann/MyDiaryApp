@@ -99,7 +99,7 @@ class Entry(Model):
     @staticmethod
     def sort_entries(entries, mostRecent = True):
         return sorted(entries, key = lambda entry: time.mktime(entry["dateCreated"].timetuple()), reverse=mostRecent)
-    
+
     @staticmethod
     def make_printable(entries):
         for entry in entries:
@@ -108,7 +108,7 @@ class Entry(Model):
 
     def find_by_id(self, entryId):
         entry = list(self.collection.find({"_id": ObjectId(entryId)}))
-     
+
         return Entry.make_printable(entry)
 
 
@@ -129,6 +129,15 @@ class Diary(Model):
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["diaries"]
+
+    # if del diary, make sure to del all entries!
+    def remove(self):
+        if self.reload():
+            for entry_id in self['entries']:
+                # should already be strs but just in case
+                entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
+                entry.remove()
+        return super(Diary, self).remove()
 
     def find_all(self):
         diaries = list(self.collection.find())
