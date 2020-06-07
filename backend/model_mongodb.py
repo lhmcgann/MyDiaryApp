@@ -17,11 +17,13 @@ class Model(dict):
 
     def save(self):
         if not self._id:
+            self = self.make_db_ready(self)
             self['dateCreated'] = datetime.utcnow()
             self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
             # TODO: any better way to handle _id's?
             id = self["_id"]
+            del self["_id"]
             self = self.make_db_ready(self)
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
@@ -46,7 +48,6 @@ class Model(dict):
         return None
 
     def make_db_ready(self, toDB):
-        del toDB["_id"]
         return toDB
 
     def make_printable(self, toPrintable):
@@ -83,7 +84,7 @@ class Entry(Model):
             return None
 
     def make_db_ready(self, entry):
-        entry = super(Entry, self).make_db_ready(entry)
+        # entry = super(Entry, self).make_db_ready(entry)
         if entry["tags"]:
             tags = entry["tags"]
             for i in range(len(tags)):
@@ -199,11 +200,18 @@ class Tag(Model):
 
     # shouldn't be tags with same title in same diary --> can use title to get
     def find_by_title(self, title, d_id):
-        tags = list(self.collection.find({"title": title, 'd_id': d_id}))
+        tags = list(self.collection.find({"title": title, 'd_id': ObjectId(d_id)}))
         if len(tags) > 0:
             tag = self.make_printable(Tag(tags[0]))
             return tag
         return None
+
+    def make_db_ready(self, tag):
+        # if '_id' in tag:
+        #     tag["_id"] = ObjectId(tag["_id"])
+        if 'd_id' in tag:
+            tag["d_id"] = ObjectId(tag["d_id"])
+        return tag
 
     def make_printable(self, tag):
         if '_id' in tag:
@@ -236,7 +244,8 @@ class Diary(Model):
         if self._id:
             for title in tag_names:
                 tag = Tag({'title': title, 'd_id': self._id})
-                tag.reload()
+                print("RELOAD: " + str(tag.reload()))
+                print("TAG: " + str(tag))
                 res.append(tag['_id'])
         return res
 

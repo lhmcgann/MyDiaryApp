@@ -652,34 +652,39 @@ def test_text_search_entries_found():
     assert (entries[1] == e1 or entries[1] == e2) is True
 
 
-def test_find_by_al1_tag_no_id():
-    assert Diary().find_by_at_least_one_tag(["tag 1"]) == []
-
-
-def test_find_by_al1_tag_bad_id():
-    assert Diary({'_id': ObjectId()}).find_by_at_least_one_tag(["tag 1"]) == []
-
-
-def test_find_by_al1_tag_empty_diary():
-    assert Diary({'_id': D_ID}).find_by_at_least_one_tag(["tag 1"]) == []
-
-
-def test_find_by_al1_tag_none_found():
-    tags = ["tag 1", "tag 2"]
-    assert Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags) == []
-
-
-# Sort 1: a, d
-# Sort 2: a
-# Sort 3: b, c
-# Sort 4: d
-def test_find_by_al1_tag_one_found_with_one():
-    tags = ["c"]
-    entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
-    assert len(entries) == 1
-    e1 = Entry(list(Entry.collection.find({'title': "Sort Test 3"}))[0])
-    e1 = e1.make_printable(e1)
-    assert entries[0] == e1
+# def test_find_by_al1_tag_no_id():
+#     assert Diary().find_by_at_least_one_tag(["tag 1"]) == []
+#
+#
+# def test_find_by_al1_tag_bad_id():
+#     assert Diary({'_id': ObjectId()}).find_by_at_least_one_tag(["tag 1"]) == []
+#
+#
+# def test_find_by_al1_tag_empty_diary():
+#     assert Diary({'_id': D_ID}).find_by_at_least_one_tag(["tag 1"]) == []
+#
+#
+# def test_find_by_al1_tag_bad_tag():
+#     tags = ["dkghdghkf"]
+#     assert Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags) == []
+#
+#
+# def test_find_by_al1_tag_none_found():
+#     tags = ["tag 1", "tag 2"]
+#     assert Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags) == []
+#
+#
+# # Sort 1: a, d
+# # Sort 2: a
+# # Sort 3: b, c
+# # Sort 4: d
+# def test_find_by_al1_tag_one_found_with_one():
+#     tags = ["c"]
+#     entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
+#     assert len(entries) == 1
+#     e1 = Entry(list(Entry.collection.find({'title': "Sort Test 3"}))[0])
+#     e1 = e1.make_printable(e1)
+#     assert entries[0] == e1
 
 
 # def test_find_by_al1_tag_one_found_with_mult():
