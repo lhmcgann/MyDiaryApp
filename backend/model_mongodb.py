@@ -28,7 +28,7 @@ class Model(dict):
             self = self.make_db_ready(self)
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
-        self = self.make_printable(self)
+        self._id = str(self._id)
 
     def reload(self):
         if self._id:  # if in the db
@@ -71,7 +71,7 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(self._id)
+            diary["entries"].remove(ObjectId(self._id))
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
