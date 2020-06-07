@@ -235,7 +235,10 @@ def test_entry_save_new_with_diary():
     assert res is not None
     assert 'dateCreated' in res
     assert isinstance(res["_id"], ObjectId)
+<<<<<<< HEAD
     res['d_id'] = str(res['d_id'])
+=======
+>>>>>>> datetime on insert (in Model's save if no _id)
     for item in doc:
         assert item in res
         assert doc[item] == res[item]
