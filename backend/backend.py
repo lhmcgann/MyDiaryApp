@@ -14,7 +14,7 @@ CORS(app)
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
     if request.method == 'GET':
-        diaries = Diary().get_all_diaries()
+        diaries = Diary().find_all()
         return {"diaries": diaries}, 200
     elif request.method == 'POST':
         if request.args.get("title") is not None:
@@ -40,8 +40,9 @@ def retrieve_diary(diaryId):
         return jsonify(error=404, text="diary not found"), 404
 
     if request.method == "GET":
+        # frontend expects embedded entries
         diary["entries"] = Entry().get_entries_with_diary_id(diaryId)
-        return jsonify(Diary().make_printable(diary))
+        return jsonify(diary)
 
     elif request.method == "PUT":
         title = request.args.get("title")
@@ -68,7 +69,7 @@ def entries(diaryId):
         return jsonify(error=404, text="diary not found"), 404
 
     if request.method == "GET":
-        entries = Entry().get_entries_with_diary_id(diaryId)
+        entries = Entry.get_entries_with_diary_id(diaryId)
 
         if request.json and "tags" in request.json:
             tags = request.json["tags"]
@@ -91,8 +92,7 @@ def entries(diaryId):
         else:
             return jsonify(error="Need a title to create entry"), 400
 
-        doc = {"d_id": diaryId, "tags": [], "textBody": "",
-        "dateCreated": datetime.datetime.now(), "title": title}
+        doc = {"d_id": diaryId, "tags": [], "textBody": "", "title": title}
 
         entry = Entry(doc)
         entry.save()
@@ -102,13 +102,9 @@ def entries(diaryId):
 @app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
 def modifyEntries(diaryId, entryId):
     entry = Entry({'_id': entryId, 'd_id': diaryId})
-    entry.reload()
 
-    if not len(entry):
+    if not entry.reload():
         return jsonify(error=404, text="entry not found"), 404
-
-    entry = Entry({"_id": entryId, "d_id": diaryId})
-    entry.reload()
 
     if request.method == "GET":
         return jsonify(entry)

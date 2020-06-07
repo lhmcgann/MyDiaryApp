@@ -86,7 +86,7 @@ class Entry(Model):
     def get_entries(self):
         diary = self.get_diary()
         if diary:
-            return self.make_printable(diary["entries"])
+            return self.make_entries_printable(diary["entries"])
         else:
             return None
 
@@ -112,8 +112,10 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
-    def get_entries_with_diary_id(self, diaryId):
-        items = list(self.collection.find({"d_id": diaryId}))
+    @staticmethod
+    def get_entries_with_diary_id(diaryId):
+        items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
+        items = Entry.make_entries_printable(items)
         return items
 
     def get_diary(self):
@@ -142,7 +144,7 @@ class Entry(Model):
     @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
-            entry["_id"] = str(entry["_id"])
+            entry = Entry(entry).make_printable(entry)
         return entries
 
     # def find_by_id(self, entryId):
@@ -283,12 +285,12 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-    def get_all_diaries(self):
-        diaries = self.find_all()
-
-        for diary in diaries:
-            diaryId = str(diary["_id"])
-            diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
+    # def get_all_diaries(self):
+    #     diaries = self.find_all()
+    #
+    #     for diary in diaries:
+    #         diaryId = diary["_id"]  # should be a string
+    #         diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
 
         return diaries
 
