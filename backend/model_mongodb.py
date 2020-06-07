@@ -2,12 +2,8 @@ import pymongo
 import ssl
 from pymongo import MongoClient
 from bson import ObjectId
-<<<<<<< HEAD
 from datetime import datetime
-=======
 import time
-import datetime
->>>>>>> added sorting and made all request parameters optional
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
@@ -32,14 +28,15 @@ class Model(dict):
             self = self.make_db_ready(self)
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
-        self._id = str(self._id)
+        self = self.make_printable(self)
 
     def reload(self):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
                 self.update(result)  # updates created Diary (w/ id) to full doc
-                self._id = str(self._id)  # may also need to convert entry ids
+                # self._id = str(self._id)  # may also need to convert entry ids
+                self = self.make_printable(self)
                 return True
         return False
 
@@ -94,7 +91,6 @@ class Entry(Model):
             return None
 
     def make_db_ready(self, entry):
-        # entry = super(Entry, self).make_db_ready(entry)
         if entry["tags"]:
             tags = entry["tags"]
             for i in range(len(tags)):
@@ -140,15 +136,15 @@ class Entry(Model):
         return sorted(entries, key = lambda entry: time.mktime(entry["dateCreated"].timetuple()), reverse=mostRecent)
 
     @staticmethod
-    def make_printable(entries):
+    def make_entries_printable(entries):
         for entry in entries:
             entry["_id"] = str(entry["_id"])
         return entries
 
-    def find_by_id(self, entryId):
-        entry = list(self.collection.find({"_id": ObjectId(entryId)}))
-
-        return Entry.make_printable(entry)
+    # def find_by_id(self, entryId):
+    #     entry = list(self.collection.find({"_id": ObjectId(entryId)}))
+    #
+    #     return Entry.make_printable(entry)
 
 
 
@@ -250,8 +246,6 @@ class Tag(Model):
         return None
 
     def make_db_ready(self, tag):
-        # if '_id' in tag:
-        #     tag["_id"] = ObjectId(tag["_id"])
         if 'd_id' in tag:
             tag["d_id"] = ObjectId(tag["d_id"])
         return tag
@@ -290,7 +284,7 @@ class Diary(Model):
 
         for diary in diaries:
             diaryId = str(diary["_id"])
-            diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+            diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
 
         return diaries
 
@@ -326,30 +320,29 @@ class Diary(Model):
         return res
 
     def make_db_ready(self, diary):
-        diary = super(Diary, self).make_db_ready(diary)
         if diary["entries"]:
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-    def find_by_id(self, diaryId):
-        diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
-        if len(diaries):
-            diaryId = str(diaries[0]["_id"])
-            diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
-
-        return diaries
+    # def find_by_id(self, diaryId):
+    #     diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+    #     if len(diaries):
+    #         diaryId = str(diaries[0]["_id"])
+    #         diaries[0]["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
+    #
+    #     return diaries
 
     def make_printable(self, diary):
-        # if '_id' in diary:
-        #     diary["_id"] = str(diary["_id"])
-        # if 'entries' in diary:
-        #     entries = diary["entries"]
-        #     for i in range(len(entries)):
-        #         entries[i] = str(entries[i])
-        diary["_id"] = str(diary["_id"])
-        diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diary["_id"]))
+        if '_id' in diary:
+            diary["_id"] = str(diary["_id"])
+        if 'entries' in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = str(entries[i])
+        # diary["_id"] = str(diary["_id"])
+        # diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
