@@ -5,6 +5,10 @@ For Python code, use pycodestyle. See https://pypi.org/project/pycodestyle/ for 
 
 For JavaScript/React code use Prettier. Either type in the command line apm install prettier-atom or in Atom, go to File->Settings->Install and search for and install prettier-atom. Restart Atom, and the installation will be complete. See https://atom.io/packages/prettier-atom for details.
 
+Needed Versions:
+IMPORTANT: Flask 1.1 https://palletsprojects.com/blog/flask-1-1-released/
+We're also using Python 2.7.12
+
 UI Prototype
 A UI Prototype for this project an can be found on Figma at the url below.
 https://www.figma.com/file/UlfzbnwB736Uien6Gj9IHU/MyDiaryApp?node-id=0%3A1

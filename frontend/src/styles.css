@@ -34,6 +34,13 @@
   text-decoration: none;
 
 }
+.textbox{
+  white-space: pre-line;
+}
 .tag{
   margin: 5;
+}
+textarea {
+    padding: 20px;
+    margin: 20px;
 }
