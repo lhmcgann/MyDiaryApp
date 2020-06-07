@@ -252,16 +252,28 @@ class Diary(Model):
                 entries[i] = str(entries[i])
         return diary
 
-    def sort_entries_by_date_created(self, recent_last=True):
+    def sort_entries_by_date_created(self, recent_first=True):
         sort = []
         if self.reload():
             for entry_id in self['entries']:
                 entry = Entry({'_id': entry_id})
                 entry.reload()
+                entry = entry.make_printable(entry)
                 sort.append(entry)
             sort = sorted(sort, key=lambda r: r["dateCreated"],
-                          reverse=recent_last)
+                          reverse=recent_first)
         return sort
+
+    def search_entries_for_text(self, string):
+        res = []
+        if self.reload():
+            for entry_id in self['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                if string in entry['title'] or string in entry['textBody']:
+                    entry = entry.make_printable(entry)
+                    res.append(entry)
+        return res
 
     # this successfully deletes all from db but html error bc wrong (nul) return
     # def delete_all(self):

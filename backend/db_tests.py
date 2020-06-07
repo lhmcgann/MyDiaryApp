@@ -8,6 +8,7 @@ from model_mongodb import *
 D_ID = "5ececfbc28f47f5e4408ca45"
 # the ObjectId of the diary in the tests collection with the Sorted entries
 SORT_D_ID = '5edc4ef620ac8950a849d3a4'
+NUM_ENTRIES = 5
 
 
 def test_setup():
@@ -20,7 +21,7 @@ def test_setup():
     Tag.db = Tag.cluster[Tag.dbStr]
     Tag.collection = Tag.db["tags"]
 
-    assert len(list(Entry.collection.find())) == 4
+    assert len(list(Entry.collection.find())) == NUM_ENTRIES
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
 
 
@@ -599,7 +600,8 @@ def test_sort_entries_empty_diary():
     assert Diary({'_id': D_ID}).sort_entries_by_date_created() == []
 
 
-def test_sort_entries_recent_first():
+# NOTE: reverse=False --> recent last order
+def test_sort_entries_recent_last():
     diary = Diary({'_id': SORT_D_ID})
     sorted_entries = diary.sort_entries_by_date_created(False)
     assert sorted_entries != []
@@ -607,23 +609,54 @@ def test_sort_entries_recent_first():
     assert sorted_entries[1]['title'] == "Sort Test 2"
     assert sorted_entries[2]['title'] == "Sort Test 3"
     assert sorted_entries[3]['title'] == "Sort Test 4"
+    assert sorted_entries[4]['title'] == "Text Search - hello"
 
 
-def test_sort_entries_recent_last():
+def test_sort_entries_recent_first():
     diary = Diary({'_id': SORT_D_ID})
     sorted_entries = diary.sort_entries_by_date_created()
     assert sorted_entries != []
-    assert sorted_entries[3]['title'] == "Sort Test 1"
-    assert sorted_entries[2]['title'] == "Sort Test 2"
-    assert sorted_entries[1]['title'] == "Sort Test 3"
-    assert sorted_entries[0]['title'] == "Sort Test 4"
+    assert sorted_entries[0]['title'] == "Text Search - hello"
+    assert sorted_entries[4]['title'] == "Sort Test 1"
+    assert sorted_entries[3]['title'] == "Sort Test 2"
+    assert sorted_entries[2]['title'] == "Sort Test 3"
+    assert sorted_entries[1]['title'] == "Sort Test 4"
+
+
+def test_text_search_entries_no_id():
+    assert Diary().search_entries_for_text("hello") == []
+
+
+def test_text_search_entries_bad_id():
+    assert Diary({'_id': ObjectId()}).search_entries_for_text("hello") == []
+
+
+def test_text_search_entries_empty_diary():
+    assert Diary({'_id': D_ID}).search_entries_for_text("hello") == []
+
+
+def test_text_search_entries_not_found():
+    diary = Diary({'_id': SORT_D_ID})
+    assert diary.search_entries_for_text("dfkjgd;vnkgjdghjdkjgbdfkj") == []
+
+
+def test_text_search_entries_found():
+    diary = Diary({'_id': SORT_D_ID})
+    entries = diary.search_entries_for_text("hello")
+    assert len(entries) == 2
+    e1 = Entry(list(Entry.collection.find({'title': "Sort Test 3"}))[0])
+    e1 = e1.make_printable(e1)
+    e2 = Entry(list(Entry.collection.find({'title': "Text Search - hello"}))[0])
+    e2 = e2.make_printable(e2)
+    assert (entries[0] == e1 or entries[0] == e2) is True
+    assert (entries[1] == e1 or entries[1] == e2) is True
 
 
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
     assert len(diary["entries"]) == 0
-    assert len(list(Entry.collection.find())) == 4
+    assert len(list(Entry.collection.find())) == NUM_ENTRIES
 
     # set references back to main db
     Entry.dbStr = Diary.dbStr = Tag.dbStr = "myDiaryApp"
