@@ -24,8 +24,7 @@ def retrieve_diaries():
         else:
             return jsonify(error="need to enter a title"), 400
 
-        newDiary = Diary({"title": title, "dateCreated": datetime.datetime.now(),
-           "entries": []})
+        newDiary = Diary({"title": title, "entries": []})
         newDiary.save()
         resp = jsonify(newDiary.make_printable(newDiary)), 200
         return resp
@@ -63,7 +62,7 @@ def retrieve_diary(diaryId):
     else:
         return jsonify(error=404, text="not found"), 404
 
-@app.route('/diaries/<diaryId>/entries', methods=['GET', 'PUT', 'DELETE', 'POST'])
+@app.route('/diaries/<diaryId>/entries', methods=['GET', 'POST'])
 def entries(diaryId):
     diary = Diary().find_by_id(diaryId)
 
@@ -105,9 +104,6 @@ def modifyEntries(diaryId, entryId):
     if request.method == "GET":
         return jsonify(entry)
     elif request.method == "PUT":
-        entryObj = Entry({"_id": entryId, "d_id": diaryId})
-        entryObj.reload()
-
         title = entry["title"]
         text = entry["textBody"]
         tags = []
@@ -127,10 +123,10 @@ def modifyEntries(diaryId, entryId):
         elif request.json and request.json["tags"]:
             tags = list(set(request.json["tags"]))
 
-        entryObj["title"] = title
-        entryObj["textBody"] = text
-        entryObj["tags"] = tags
-        entryObj.save()
+        entry["title"] = title
+        entry["textBody"] = text
+        entry["tags"] = tags
+        entry.save()
 
         return jsonify(success=True)
 

@@ -71,13 +71,6 @@ class Entry(Model):
         else:
             return None
 
-    def get_entries(self):
-        diary = self.get_diary()
-        if diary:
-            return self.make_printable(diary["entries"])
-        else:
-            return None
-
     def get_entries_with_diary_id(self, diaryId):
         items = list(self.collection.find({"d_id": diaryId}))
         return items
@@ -143,7 +136,7 @@ class Diary(Model):
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
         if len(diaries):
-            diaryId = str(self._id)
+            diaryId = str(diaries[0]["_id"])
             diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
 
         return diaries
