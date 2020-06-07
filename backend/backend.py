@@ -4,29 +4,30 @@ from flask import jsonify
 from flask_cors import CORS
 from flask import abort
 import ssl
-from model_mongodb import Diary
+from model_mongodb import *
 import data_model as model
+import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-diaries = []
-diary1 = model.Diary("My Diary")
+# diaries = []
+# diary1 = model.Diary("My Diary")
 
-entry1 = model.Entry()
-entry1.updateEntry("Entry 1",["first", "fun"], "This is my first Entry!!!!")
+# entry1 = model.Entry()
+# entry1.updateEntry("Entry 1",["first", "fun"], "This is my first Entry!!!!")
 
-entry2 = model.Entry()
-entry2.updateEntry("Entry 2",["second", "fun"], "This is my second Entry!!!!")
+# entry2 = model.Entry()
+# entry2.updateEntry("Entry 2",["second", "fun"], "This is my second Entry!!!!")
 
-entry3 = model.Entry()
-entry3.updateEntry("Entry 3",["third", "fun"], "This is my third Entry!!!!")
+# entry3 = model.Entry()
+# entry3.updateEntry("Entry 3",["third", "fun"], "This is my third Entry!!!!")
 
-diary1.appendEntry(entry1)
-diary1.appendEntry(entry2)
-diary1.appendEntry(entry3)
+# diary1.appendEntry(entry1)
+# diary1.appendEntry(entry2)
+# diary1.appendEntry(entry3)
 
-diaries.append(diary1)
+# diaries.append(diary1)
 
 
 
@@ -35,9 +36,9 @@ diaries.append(diary1)
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
     if request.method == 'GET':
-        #diaries = Diary().find_all()
-        #return {"diaries": diaries}, 200
-        return jsonify([diary.json() for diary in diaries]), 200
+        diaries = Diary().find_all()
+        return {"diaries": diaries}, 200
+        # return jsonify([diary.json() for diary in diaries]), 200
     elif request.method == 'POST':
         # diaryToAdd = request.get_json()
         # newDiary = Diary(diaryToAdd)
@@ -50,18 +51,26 @@ def retrieve_diaries():
         else:
             return jsonify(error="need to enter a title"), 400
 
-        newDiary = model.Diary(title)
-        diaries.append(newDiary)
-        resp = jsonify(newDiary.__dict__), 200
+        newDiary = Diary({"title": title, "dateCreated": datetime.datetime.now(),
+           "entries": []})
+        newDiary.save()
+        resp = jsonify(newDiary.make_printable(newDiary)), 200
         return resp
+        # newDiary = model.Diary(title)
+        # diaries.append(newDiary)
+        # resp = jsonify(newDiary.__dict__), 200
+        # return resp
 
     else:
         return jsonify(error="bad request"), 400
 
 
-@app.route('/diaries/<int:diaryId>', methods=['GET', 'PUT', 'DELETE'])
+@app.route('/diaries/<diaryId>', methods=['GET', 'PUT', 'DELETE'])
 def retrieve_diary(diaryId):
-    diary = [diary.json() for diary in diaries if diary.id == diaryId]
+    # diary = [diary.json() for diary in diaries if diary.id == diaryId]
+
+    diary = Diary().find_by_id(diaryId)
+    print(diary)
 
     if not len(diary):
         return jsonify(error=404, text="diary not found"), 404
@@ -69,7 +78,7 @@ def retrieve_diary(diaryId):
     diary = diary[0]
 
     if request.method == "GET":
-        return diary
+        return jsonify(Diary().make_printable(diary))
 
     elif request.method == "PUT":
         title = request.args.get("title")

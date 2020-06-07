@@ -272,6 +272,10 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
+    def find_by_id(self, diaryId):
+        diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+        return diaries
+
     def make_printable(self, diary):
         if '_id' in diary:
             diary["_id"] = str(diary["_id"])
