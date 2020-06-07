@@ -79,10 +79,11 @@ def entries(diaryId):
             sortBy_to_ascending = {"mostrecent": True, "leastrecent": False}
 
             if sortBy in sortBy_to_ascending:
-                entries = Entry.sort_entries(entries, mostRecent=sortBy_to_ascending[sortBy])
-
+                entries = diary
+                .sort_entries_by_date_created(sortBy_to_ascending[sortBy])
 
         return jsonify(Entry.make_entries_printable(entries)), 200
+
     elif request.method == "POST":
         title = None
         if request.args.get("title"):

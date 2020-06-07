@@ -126,11 +126,6 @@ class Entry(Model):
 
     # TODO: test
     @staticmethod
-    def sort_entries(entries, mostRecent = True):
-        return sorted(entries, key = lambda entry: time.mktime(entry["dateCreated"].timetuple()), reverse=mostRecent)
-
-    # TODO: test
-    @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
             entry = Entry(entry).make_printable(entry)
