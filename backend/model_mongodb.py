@@ -77,6 +77,13 @@ class Entry(Model):
         else:
             return None
 
+    def get_entries(self):
+        diary = self.get_diary()
+        if diary:
+            return self.make_printable(diary["entries"])
+        else:
+            return None
+
     def make_db_ready(self, entry):
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
