@@ -325,7 +325,7 @@ class Diary(Model):
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
         if len(diaries):
-            diaryId = str(self._id)
+            diaryId = str(diaries[0]["_id"])
             diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
 
         return diaries
