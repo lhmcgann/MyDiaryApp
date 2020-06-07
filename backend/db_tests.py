@@ -10,13 +10,11 @@ D_ID = "5ececfbc28f47f5e4408ca45"
 
 def test_setup():
     # enter "test mode": use testing db
-    Entry.dbStr = Diary.dbStr = Tag.dbStr = "tests"
+    Entry.dbStr = Diary.dbStr = "tests"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
-    Tag.db = Tag.cluster[Tag.dbStr]
-    Tag.collection = Tag.db["tags"]
 
     assert Entry.collection.find_one({}) is None
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
@@ -25,7 +23,7 @@ def test_setup():
 def test_entry_gets_TEST():
     entry = Entry()
     clxns = entry.db.list_collection_names()
-    expect = ["tests", "tags", "diaries", "entries"]
+    expect = ["tests", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -33,7 +31,7 @@ def test_entry_gets_TEST():
 def test_diary_gets_TEST():
     diary = Diary()
     clxns = diary.db.list_collection_names()
-    expect = ["tests", "tags", "diaries", "entries"]
+    expect = ["tests", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -167,7 +165,7 @@ def test_find_entry_in_diary_not_found():
 def test_find_entry_in_diary_found():
     title = "test_find_entry_in_diary_found"
     doc = {"title": title, "tags": [], "textBody": "nothing",
-           "dateCreated": "TODO", "d_id": D_ID}
+           "dateCreated": "TODO"}
     # put entry in db (to give it an _id) and then find in db
     Entry.collection.insert_one(doc)
     from_db = Entry.collection.find_one({"title": title})
@@ -200,7 +198,6 @@ def test_entry_save_new_with_diary():
 
     res = entry.collection.find_one({"title": title})
     assert res is not None
-    assert isinstance(res["_id"], ObjectId)
     for item in doc:
         assert item in res
         assert doc[item] == res[item]
@@ -208,10 +205,7 @@ def test_entry_save_new_with_diary():
     # check entry _id got into diary's entries array
     diary = Diary({"_id": D_ID})
     diary.reload()
-    assert isinstance(diary["_id"], str)
-    for e in diary["entries"]:
-        assert isinstance(e, str)
-    assert str(res["_id"]) in diary["entries"]
+    assert res["_id"] in diary["entries"]
 
 
 def test_entry_save_old_with_diary():
@@ -235,7 +229,7 @@ def test_entry_save_old_with_diary():
     diary.reload()
     count = 0
     for id in diary["entries"]:
-        if (id == str(res["_id"])):
+        if (id == res["_id"]):
             count = count + 1
     assert count == 1
 
@@ -347,244 +341,6 @@ def test_entry_remove_2():
     assert id not in diary["entries"]
 
 
-def test_tag_find_by_title_bad_title():
-    assert Tag().find_by_title("bad title", D_ID) is None
-
-
-def test_tag_find_by_title_bad_did():
-    assert Tag().find_by_title("valid title", ObjectId()) is None
-
-
-def test_tag_find_by_title():
-    tag = Tag().find_by_title("first tag", D_ID)
-    assert tag is not None
-    assert tag['title'] == "first tag"
-    assert isinstance(tag["_id"], str)
-
-
-def test_add_tag_no_eid():
-    assert Entry().add_tag("valid tag") is False
-
-
-def test_add_tag_bad_eid():
-    assert Entry({"_id": str(ObjectId())}).add_tag("valid tag") is False
-
-
-def test_add_tag_existing():
-    e_doc = {"title": "test_add_tag", "tags": [], "dateCreated": "TODO",
-             "textBody": "nada mucho", "d_id": D_ID}
-    entry = Entry(e_doc)
-    entry.save()
-    entry.reload()
-    assert entry is not None
-    assert "_id" in entry
-    assert len(entry["tags"]) == 0
-
-    tag_name = "valid tag"
-    assert entry.add_tag(tag_name) is True
-    assert len(entry["tags"]) == 1
-
-    tag_id = str(entry["tags"][0])  # actual ObjectId rn; TODO: should be a str
-    tag = Tag({"_id": tag_id})
-    assert tag.reload() is True
-    assert tag["title"] == tag_name
-
-
-def test_add_tag_new():
-    title = "test_add_tag"
-    res = Entry.collection.find({"title": title})
-    assert res is not None
-    id = str(res[0]["_id"])
-
-    entry = Entry({"_id": id})
-    entry.reload()
-    assert isinstance(entry["_id"], str)
-    assert len(entry["tags"]) == 1
-    for tag in entry["tags"]:
-        assert isinstance(tag, str)
-
-    tag_name = "new tag"
-    entry.add_tag(tag_name)
-    assert len(entry["tags"]) == 2
-    for tag in entry["tags"]:
-        assert isinstance(tag, str)
-    tag = Tag().find_by_title(tag_name, entry.d_id)
-    assert tag is not None
-    assert "d_id" in tag
-
-
-def test_save_tag_no_args():
-    count = len(list(Tag.collection.find()))
-    Tag().save()
-    count2 = len(list(Tag.collection.find()))
-    assert count == count2
-
-
-def test_save_tag_bad_did():
-    count = len(list(Tag.collection.find()))
-    tag = Tag({'title': 'first tag', 'd_id': ObjectId()})
-    tag.save()
-    count2 = len(list(Tag.collection.find()))
-    assert count == count2
-
-
-def test_save_tag_old_id():
-    before = Tag({'_id': '5edc2aab2d64f19e729bff38'})  # id of first tag
-    before.reload()
-
-    count = len(list(Tag.collection.find()))
-    tag = Tag({'_id': '5edc2aab2d64f19e729bff38', 'title': 'wrong'})
-    tag.save()
-    tag.reload()
-    count2 = len(list(Tag.collection.find()))
-    assert count == count2
-    assert tag != before
-    assert tag['title'] == 'wrong'
-
-    tag['title'] = 'first tag'
-    tag.save()
-    tag.reload()
-    count2 = len(list(Tag.collection.find()))
-    assert count == count2
-    assert tag == before
-
-
-def test_save_tag_old_title_did():
-    before = Tag({'_id': '5edc2aab2d64f19e729bff38'})  # id of first tag
-    before.reload()
-
-    count = len(list(Tag.collection.find()))
-    tag = Tag({'title': 'first tag', 'd_id': D_ID})
-    tag.save()
-    count2 = len(list(Tag.collection.find()))
-    assert count == count2
-
-    tag.reload()
-    assert tag == before
-
-
-def test_save_tag_new_title():
-    count = len(list(Tag.collection.find()))
-    tag = Tag({'title': 'test_save_tag_new_title', 'd_id': D_ID})
-    tag.save()
-    count2 = len(list(Tag.collection.find()))
-    assert (count+1) == count2
-
-    tag.reload()
-    assert '_id' in tag
-    assert isinstance(tag['_id'], str)
-
-    tag.remove()  # cleanup
-
-
-def test_reload_tag_no_args():
-    assert Tag().reload() is False
-
-
-def test_reload_tag_bad_id():
-    assert Tag({'_id': ObjectId()}).reload() is False
-
-
-def test_reload_tag_no_title():
-    assert Tag({'d_id': D_ID}).reload() is False
-
-
-def test_reload_tag_no_did():
-    assert Tag({'title': 'valid tag'}).reload() is False
-
-
-def test_reload_tag_bad_title():
-    assert Tag({'title': 'bad tag title', 'd_id': D_ID}).reload() is False
-
-
-def test_reload_tag_bad_did():
-    assert Tag({'title': 'valid tag', 'd_id': ObjectId()}).reload() is False
-
-
-def test_reload_tag():
-    tag = Tag({"title": 'valid tag', 'd_id': D_ID})
-    assert tag.reload() is True
-    assert '_id' in tag
-    id = tag['_id']
-    assert isinstance(id, str)
-
-    tag2 = Tag({'_id': id})
-    assert tag2.reload() is True
-    assert tag == tag2
-
-
-def test_delete_tag_no_eid():
-    assert Entry().delete_tag("valid tag") is False
-
-
-def test_delete_tag_bad_eid():
-    assert Entry({"_id": str(ObjectId())}).delete_tag("valid tag") is False
-
-
-def test_delete_tag_dne():
-    title = "test_add_tag"
-    res = Entry.collection.find({"title": title})
-    assert res is not None
-    entry = Entry(res[0])
-    assert entry.reload() is True
-    assert len(entry["tags"]) == 2
-
-    tag_name = "bad tag"
-    assert Tag().find_by_title(tag_name, entry.d_id) is None
-    assert entry.delete_tag(tag_name) is False
-    assert len(entry["tags"]) == 2
-
-
-def test_delete_tag():
-    title = "test_add_tag"
-    res = Entry.collection.find({"title": title})
-    assert res is not None
-    entry = Entry(res[0])
-    assert entry.reload() is True
-    assert len(entry["tags"]) == 2
-
-    tag_name = "valid tag"
-    assert Tag().find_by_title(tag_name, entry.d_id) is not None
-    assert entry.delete_tag(tag_name) is True
-    entry.reload()
-    assert len(entry["tags"]) == 1
-    assert Tag().find_by_title(tag_name, entry.d_id) is not None
-
-
-def test_remove_tag_no_title():
-    assert Tag({'d_id': D_ID}).remove() is None
-
-
-def test_remove_tag_bad_title():
-    assert Tag({'title': 'fake', 'd_id': D_ID}).remove() is -1
-
-
-def test_remove_tag_no_did():
-    assert Tag({'title': 'valid tag'}).remove() is None
-
-
-def test_remove_tag_bad_did():
-    assert Tag({'title': 'valid tag', 'd_id': ObjectId()}).remove() is -1
-
-
-def test_remove_tag():
-    title = "test_add_tag"
-    res = Entry.collection.find({"title": title})
-    assert res is not None
-    entry = Entry(res[0])
-    assert entry.reload() is True
-    assert len(entry["tags"]) == 1
-
-    tag_name = "new tag"
-    tag = Tag({'title': tag_name, 'd_id': entry.d_id})
-    assert tag.remove() == 1
-    entry.reload()
-    assert len(entry["tags"]) == 0
-    assert Tag().find_by_title(tag_name, entry.d_id) is None
-
-    assert entry.remove() is not None  # cleanup for testing
-
-
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
@@ -592,13 +348,11 @@ def test_end():
     assert Entry.collection.find_one({}) is None
 
     # set references back to main db
-    Entry.dbStr = Diary.dbStr = Tag.dbStr = "myDiaryApp"
+    Entry.dbStr = Diary.dbStr = "myDiaryApp"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
-    Tag.db = Tag.cluster[Tag.dbStr]
-    Tag.collection = Tag.db["tags"]
 
 
 # def test_find_all_diaries():
