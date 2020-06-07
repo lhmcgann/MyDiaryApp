@@ -8,3 +8,7 @@ For JavaScript/React code use Prettier. Either type in the command line apm inst
 Needed Versions:
 IMPORTANT: Flask 1.1 https://palletsprojects.com/blog/flask-1-1-released/
 We're also using Python 2.7.12
+
+UI Prototype
+A UI Prototype for this project an can be found on Figma at the url below.
+https://www.figma.com/file/UlfzbnwB736Uien6Gj9IHU/MyDiaryApp?node-id=0%3A1

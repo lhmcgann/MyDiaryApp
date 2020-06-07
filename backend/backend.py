@@ -24,7 +24,7 @@ def retrieve_diaries():
         else:
             return jsonify(error="need to enter a title"), 400
 
-        newDiary = Diary({"title": title, "entries": [], "dateCreated": datetime.datetime.now()})
+        newDiary = Diary({"title": title, "entries": [], "dateCreated": datetime.datetime.utcnow()})
         newDiary.save()
         resp = jsonify(newDiary.make_printable(newDiary)), 200
         return resp
@@ -42,7 +42,7 @@ def retrieve_diary(diaryId):
     diary = Diary(diary[0])
 
     if request.method == "GET":
-        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)        
+        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)
         return jsonify(Diary().make_printable(diary))
 
     elif request.method == "PUT":
@@ -95,7 +95,7 @@ def entries(diaryId):
         else:
             return jsonify(error="Need a title to create entry"), 400
 
-        doc = {"d_id": diaryId, "tags": [], "textBody": "", 
+        doc = {"d_id": diaryId, "tags": [], "textBody": "",
         "dateCreated": datetime.datetime.now(), "title": title}
 
         entry = Entry(doc)
