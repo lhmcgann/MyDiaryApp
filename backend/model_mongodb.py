@@ -47,12 +47,6 @@ class Model(dict):
             return resp
         return None
 
-    def make_db_ready(self, toDB):
-        return toDB
-
-    def make_printable(self, toPrintable):
-        return toPrintable
-
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
@@ -84,8 +78,6 @@ class Entry(Model):
             return None
 
     def make_db_ready(self, entry):
-        if '_id' in entry:
-            entry["_id"] = ObjectId(entry["_id"])
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
         if entry["tags"]:
@@ -105,6 +97,7 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
+    # TODO: test
     @staticmethod
     def get_entries_with_diary_id(diaryId):
         items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
@@ -118,6 +111,7 @@ class Entry(Model):
             return (diary if res else None)
         return None
 
+    # TODO: test
     @staticmethod
     def filter_with_tags(entries, tags):
         def entry_has_tag(entry):
@@ -130,10 +124,12 @@ class Entry(Model):
         filtered_entries = list(filter(entry_has_tag, entries))
         return filtered_entries
 
+    # TODO: test
     @staticmethod
     def sort_entries(entries, mostRecent = True):
         return sorted(entries, key = lambda entry: time.mktime(entry["dateCreated"].timetuple()), reverse=mostRecent)
 
+    # TODO: test
     @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
@@ -198,7 +194,7 @@ class Tag(Model):
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
-        return None
+        return None  # TODO: test
 
     def reload(self):
         if self._id:
@@ -256,6 +252,7 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
+    # TODO: test
     # if del diary, make sure to del all entries!
     def remove(self):
         if self.reload():
@@ -265,44 +262,44 @@ class Diary(Model):
                 entry.remove()
         return super(Diary, self).remove()
 
+    # TODO: test
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
             diary = self.make_printable(diary)
         return diaries
 
-        return diaries
-
+    # TODO: test
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change all ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
 
-    def translate_to_tag_ids(self, tag_names):
-        res = []
-        if self._id:
-            for title in tag_names:
-                tag = Tag({'title': title, 'd_id': self._id})
-                print("RELOAD: " + str(tag.reload()))
-                print("TAG: " + str(tag))
-                res.append(tag['_id'])
-        return res
-
-    # tags is a string array of tag titles
-    def find_by_at_least_one_tag(self, tag_names):
-        res = []
-        if self.reload():
-            tag_ids = self.translate_to_tag_ids(tag_names)
-            for entry_id in self['entries']:
-                entry = Entry({'_id': entry_id})
-                entry.reload()
-                # tag for tag in tag_ids if tag in entry['tags']
-                for tag in tag_ids:
-                    if tag in entry["tags"]:
-                        entry = entry.make_printable(entry)
-                        res.append(entry)
-        return res
+    # def translate_to_tag_ids(self, tag_names):
+    #     res = []
+    #     if self._id:
+    #         for title in tag_names:
+    #             tag = Tag({'title': title, 'd_id': self._id})
+    #             print("RELOAD: " + str(tag.reload()))
+    #             print("TAG: " + str(tag))
+    #             res.append(tag['_id'])
+    #     return res
+    #
+    # # tags is a string array of tag titles
+    # def find_by_at_least_one_tag(self, tag_names):
+    #     res = []
+    #     if self.reload():
+    #         tag_ids = self.translate_to_tag_ids(tag_names)
+    #         for entry_id in self['entries']:
+    #             entry = Entry({'_id': entry_id})
+    #             entry.reload()
+    #             # tag for tag in tag_ids if tag in entry['tags']
+    #             for tag in tag_ids:
+    #                 if tag in entry["tags"]:
+    #                     entry = entry.make_printable(entry)
+    #                     res.append(entry)
+    #     return res
 
     def make_db_ready(self, diary):
         if diary["entries"]:
