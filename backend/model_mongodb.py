@@ -89,11 +89,14 @@ class Entry(Model):
         return entry
 
     def make_printable(self, entry):
-        entry["_id"] = str(entry["_id"])
-        entry["d_id"] = str(entry["d_id"])
-        tags = entry["tags"]
-        for i in range(len(tags)):
-            tags[i] = str(tags[i])
+        if '_id' in entry:
+            entry["_id"] = str(entry["_id"])
+        if 'd_id' in entry:
+            entry["d_id"] = str(entry["d_id"])
+        if 'tags' in entry:
+            tags = entry["tags"]
+            for i in range(len(tags)):
+                tags[i] = str(tags[i])
         return entry
 
     def get_diary(self):
@@ -239,10 +242,12 @@ class Diary(Model):
         return diary
 
     def make_printable(self, diary):
-        diary["_id"] = str(diary["_id"])
-        entries = diary["entries"]
-        for i in range(len(entries)):
-            entries[i] = str(entries[i])
+        if '_id' in diary:
+            diary["_id"] = str(diary["_id"])
+        if 'entries' in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = str(entries[i])
         return diary
 
     # this successfully deletes all from db but html error bc wrong (nul) return
