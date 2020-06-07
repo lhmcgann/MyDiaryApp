@@ -6,7 +6,7 @@ const EntryListBody = (props) => {
     return (
       <div>
       <Link className="entry-block" to={
-        `${window.location.pathname}/entries/${row.id}`}>
+        `${window.location.pathname}/entries/${row._id}`}>
       {row.title}
       </Link>
       <button onClick={() => props.removeCharacter(index)}>Delete</button>
