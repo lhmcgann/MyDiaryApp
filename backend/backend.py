@@ -19,12 +19,12 @@ def retrieve_diaries():
     elif request.method == 'POST':
         if request.args.get("title") is not None:
             title = request.args.get("title")
-        elif request.json and request.json["title"] is not None:
+        elif request.json and "title" in request.json is not None:
             title = request.json["title"]
         else:
             return jsonify(error="need to enter a title"), 400
 
-        newDiary = Diary({"title": title, "entries": []})
+        newDiary = Diary({"title": title, "entries": [], "dateCreated": datetime.datetime.now()})
         newDiary.save()
         resp = jsonify(newDiary.make_printable(newDiary)), 200
         return resp
@@ -74,22 +74,29 @@ def entries(diaryId):
     if request.method == "GET":
         entries = Entry().get_entries_with_diary_id(diaryId)
 
-        if request.json and request.json["tags"]:
+        if request.json and "tags" in request.json:
             tags = request.json["tags"]
             entries = Entry.filter_with_tags(entries, tags)
+        if request.json and "sortBy" in request.json:
+            sortBy = request.json["sortBy"].lower()
+            sortBy_to_ascending = {"mostrecent": True, "leastrecent": False}
+
+            if sortBy in sortBy_to_ascending:
+                entries = Entry.sort_entries(entries, mostRecent=sortBy_to_ascending[sortBy])
+
 
         return jsonify(Entry.make_printable(entries)), 200
     elif request.method == "POST":
         title = None
         if request.args.get("title"):
             title = request.args.get("title")
-        elif request.json and request.json["title"]:
+        elif request.json and "title" in request.json:
             title = request.json["title"]
         else:
             return jsonify(error="Need a title to create entry"), 400
 
-        doc = {"d_id": diaryId, "tags": [], "textBody": "",
-           "title": title}
+        doc = {"d_id": diaryId, "tags": [], "textBody": "", 
+        "dateCreated": datetime.datetime.now(), "title": title}
 
         entry = Entry(doc)
         entry.save()
@@ -115,17 +122,17 @@ def modifyEntries(diaryId, entryId):
 
         if request.args.get("title"):
             title = request.args.get("title")
-        elif request.json and request.json["title"]:
+        elif request.json and "title" in request.json:
             title = request.json["title"]
 
         if request.args.get("text"):
             text = request.args.get("text")
-        elif request.json and request.json["text"]:
+        elif request.json and "text" in request.json:
             text = request.json["text"]
 
         if request.args.get("tags"):
             return jsonify(error="Tags must be in the request body not in the params"), 400
-        elif request.json and request.json["tags"]:
+        elif request.json and "tags" in request.json:
             tags = list(set(request.json["tags"]))
 
         entry["title"] = title

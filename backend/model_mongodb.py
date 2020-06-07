@@ -2,7 +2,12 @@ import pymongo
 import ssl
 from pymongo import MongoClient
 from bson import ObjectId
+<<<<<<< HEAD
 from datetime import datetime
+=======
+import time
+import datetime
+>>>>>>> added sorting and made all request parameters optional
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
@@ -129,6 +134,10 @@ class Entry(Model):
 
         filtered_entries = list(filter(entry_has_tag, entries))
         return filtered_entries
+
+    @staticmethod
+    def sort_entries(entries, mostRecent = True):
+        return sorted(entries, key = lambda entry: time.mktime(entry["dateCreated"].timetuple()), reverse=mostRecent)
 
     @staticmethod
     def make_printable(entries):
