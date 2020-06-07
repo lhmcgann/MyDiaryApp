@@ -119,6 +119,7 @@ class Entry(Model):
             res = diary.reload()
             return (diary if res else None)
         return None
+
     @staticmethod
     def make_printable(entries):
         for entry in entries:
@@ -313,12 +314,14 @@ class Diary(Model):
         return diaries
 
     def make_printable(self, diary):
-        if '_id' in diary:
-            diary["_id"] = str(diary["_id"])
-        if 'entries' in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = str(entries[i])
+        # if '_id' in diary:
+        #     diary["_id"] = str(diary["_id"])
+        # if 'entries' in diary:
+        #     entries = diary["entries"]
+        #     for i in range(len(entries)):
+        #         entries[i] = str(entries[i])
+        diary["_id"] = str(diary["_id"])
+        diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
