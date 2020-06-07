@@ -104,6 +104,10 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
+    def get_entries_with_diary_id(self, diaryId):
+        items = list(self.collection.find({"d_id": diaryId}))
+        return items
+
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
@@ -320,6 +324,10 @@ class Diary(Model):
 
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+        if len(diaries):
+            diaryId = str(self._id)
+            diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+
         return diaries
 
     def make_printable(self, diary):
