@@ -231,9 +231,29 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-    # tags is a string array of tag names
-    def find_by_at_least_one_tag(self, tags):
-        return None
+    def translate_to_tag_ids(self, tag_names):
+        res = []
+        if self._id:
+            for title in tag_names:
+                tag = Tag({'title': title, 'd_id': self._id})
+                tag.reload()
+                res.append(tag['_id'])
+        return res
+
+    # tags is a string array of tag titles
+    def find_by_at_least_one_tag(self, tag_names):
+        res = []
+        if self.reload():
+            tag_ids = self.translate_to_tag_ids(tag_names)
+            for entry_id in self['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                # tag for tag in tag_ids if tag in entry['tags']
+                for tag in tag_ids:
+                    if tag in entry["tags"]:
+                        entry = entry.make_printable(entry)
+                        res.append(entry)
+        return res
 
     def make_db_ready(self, diary):
         diary = super(Diary, self).make_db_ready(diary)
