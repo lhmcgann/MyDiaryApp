@@ -27,16 +27,14 @@ class Model(dict):
             self = self.make_db_ready(self)
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
-        self = self.make_printable(self)
+        self._id = str(self._id)
 
     def reload(self):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
-                self.update(result)  # updates created doc (w/ id) to full doc
-                # TODO: call a make_printable() function?
-                # self._id = str(self._id)  # may also need to convert entry ids
-                self.make_printable(self)
+                self.update(result)  # updates created Diary (w/ id) to full doc
+                self._id = str(self._id)  # may also need to convert entry ids
                 return True
         return False
 
@@ -47,12 +45,15 @@ class Model(dict):
             return resp
         return None
 
+<<<<<<< HEAD
     def make_db_ready(self, toDB):
         return toDB
 
     def make_printable(self, toPrintable):
         return toPrintable
 
+=======
+>>>>>>> Revert "Tags"
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
@@ -77,12 +78,13 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(self._id)
+            diary["entries"].remove(ObjectId(self._id))
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
             return None
 
+<<<<<<< HEAD
     def get_entries(self):
         diary = self.get_diary()
         if diary:
@@ -109,6 +111,8 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
+=======
+>>>>>>> Revert "Tags"
     def get_entries_with_diary_id(self, diaryId):
         items = list(self.collection.find({"d_id": diaryId}))
         return items
@@ -143,6 +147,7 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
+<<<<<<< HEAD
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
@@ -244,6 +249,8 @@ class Tag(Model):
             tag["d_id"] = str(tag["d_id"])
         return tag
 
+=======
+>>>>>>> Revert "Tags"
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
@@ -272,6 +279,7 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
+<<<<<<< HEAD
     def translate_to_tag_ids(self, tag_names):
         res = []
         if self._id:
@@ -305,6 +313,8 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
+=======
+>>>>>>> Revert "Tags"
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
         if len(diaries):
