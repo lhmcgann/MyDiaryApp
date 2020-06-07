@@ -45,15 +45,12 @@ class Model(dict):
             return resp
         return None
 
-<<<<<<< HEAD
     def make_db_ready(self, toDB):
         return toDB
 
     def make_printable(self, toPrintable):
         return toPrintable
 
-=======
->>>>>>> Revert "Tags"
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
@@ -84,7 +81,6 @@ class Entry(Model):
         else:
             return None
 
-<<<<<<< HEAD
     def get_entries(self):
         diary = self.get_diary()
         if diary:
@@ -111,8 +107,6 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
-=======
->>>>>>> Revert "Tags"
     def get_entries_with_diary_id(self, diaryId):
         items = list(self.collection.find({"d_id": diaryId}))
         return items
@@ -123,6 +117,18 @@ class Entry(Model):
             res = diary.reload()
             return (diary if res else None)
         return None
+
+    @staticmethod
+    def filter_with_tags(entries, tags):
+        def entry_has_tag(entry):
+            entry_tags = set(entry["tags"])
+            for tag in tags:
+                if tag not in entry_tags:
+                    return False
+            return True
+
+        filtered_entries = list(filter(entry_has_tag, entries))
+        return filtered_entries
 
     @staticmethod
     def make_printable(entries):
@@ -147,7 +153,6 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
-<<<<<<< HEAD
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
@@ -249,8 +254,6 @@ class Tag(Model):
             tag["d_id"] = str(tag["d_id"])
         return tag
 
-=======
->>>>>>> Revert "Tags"
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
@@ -279,7 +282,6 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-<<<<<<< HEAD
     def translate_to_tag_ids(self, tag_names):
         res = []
         if self._id:
@@ -313,8 +315,6 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-=======
->>>>>>> Revert "Tags"
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
         if len(diaries):

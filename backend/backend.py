@@ -42,7 +42,7 @@ def retrieve_diary(diaryId):
     diary = Diary(diary[0])
 
     if request.method == "GET":
-        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)
+        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)        
         return jsonify(Diary().make_printable(diary))
 
     elif request.method == "PUT":
@@ -73,6 +73,11 @@ def entries(diaryId):
 
     if request.method == "GET":
         entries = Entry().get_entries_with_diary_id(diaryId)
+
+        if request.json and request.json["tags"]:
+            tags = request.json["tags"]
+            entries = Entry.filter_with_tags(entries, tags)
+
         return jsonify(Entry.make_printable(entries)), 200
     elif request.method == "POST":
         title = None
