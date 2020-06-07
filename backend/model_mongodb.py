@@ -80,7 +80,7 @@ class Entry(Model):
     def get_entries(self):
         diary = self.get_diary()
         if diary:
-            return self.make_printable(diary["entries"])
+            return self.make_entries_printable(diary["entries"])
         else:
             return None
 
@@ -104,8 +104,10 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
-    def get_entries_with_diary_id(self, diaryId):
-        items = list(self.collection.find({"d_id": diaryId}))
+    @staticmethod
+    def get_entries_with_diary_id(diaryId):
+        items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
+        items = Entry.make_entries_printable(items)
         return items
 
     def get_diary(self):
