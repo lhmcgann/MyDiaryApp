@@ -3,6 +3,7 @@ import ssl
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
+from operator import itemgetter
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
@@ -251,6 +252,17 @@ class Diary(Model):
             for i in range(len(entries)):
                 entries[i] = str(entries[i])
         return diary
+
+    def sort_entries_by_date_created(self, recent_last=True):
+        sort = []
+        if self.reload():
+            for entry_id in self['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                sort.append(entry)
+            sort = sorted(sort, key=lambda r: r["dateCreated"],
+                          reverse=recent_last)
+        return sort
 
     # this successfully deletes all from db but html error bc wrong (nul) return
     # def delete_all(self):

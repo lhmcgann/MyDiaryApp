@@ -4,8 +4,10 @@ from bson import ObjectId
 from model_mongodb import *
 
 
-# the ObjectId of the diary in the tests collection
+# the ObjectId of the main diary in the tests collection
 D_ID = "5ececfbc28f47f5e4408ca45"
+# the ObjectId of the diary in the tests collection with the Sorted entries
+SORT_D_ID = '5edc4ef620ac8950a849d3a4'
 
 
 def test_setup():
@@ -18,7 +20,7 @@ def test_setup():
     Tag.db = Tag.cluster[Tag.dbStr]
     Tag.collection = Tag.db["tags"]
 
-    assert Entry.collection.find_one({}) is None
+    assert len(list(Entry.collection.find())) == 4
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
 
 
@@ -585,11 +587,43 @@ def test_remove_tag():
     assert entry.remove() is not None  # cleanup for testing
 
 
+def test_sort_entries_no_id():
+    assert Diary().sort_entries_by_date_created() == []
+
+
+def test_sort_entries_bad_id():
+    assert Diary({'_id': ObjectId()}).sort_entries_by_date_created() == []
+
+
+def test_sort_entries_empty_diary():
+    assert Diary({'_id': D_ID}).sort_entries_by_date_created() == []
+
+
+def test_sort_entries_recent_first():
+    diary = Diary({'_id': SORT_D_ID})
+    sorted_entries = diary.sort_entries_by_date_created(False)
+    assert sorted_entries != []
+    assert sorted_entries[0]['title'] == "Sort Test 1"
+    assert sorted_entries[1]['title'] == "Sort Test 2"
+    assert sorted_entries[2]['title'] == "Sort Test 3"
+    assert sorted_entries[3]['title'] == "Sort Test 4"
+
+
+def test_sort_entries_recent_last():
+    diary = Diary({'_id': SORT_D_ID})
+    sorted_entries = diary.sort_entries_by_date_created()
+    assert sorted_entries != []
+    assert sorted_entries[3]['title'] == "Sort Test 1"
+    assert sorted_entries[2]['title'] == "Sort Test 2"
+    assert sorted_entries[1]['title'] == "Sort Test 3"
+    assert sorted_entries[0]['title'] == "Sort Test 4"
+
+
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
     assert len(diary["entries"]) == 0
-    assert Entry.collection.find_one({}) is None
+    assert len(list(Entry.collection.find())) == 4
 
     # set references back to main db
     Entry.dbStr = Diary.dbStr = Tag.dbStr = "myDiaryApp"
