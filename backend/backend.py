@@ -121,37 +121,50 @@ def entries(diaryId):
         else:
             return jsonify(error="Need a title to create entry"), 400
 
-        entry = model.Entry(title)
+        doc = {"d_id": diaryId, "tags": [], "textBody": "This is the OG text.",
+           "title": title}
 
-        for d in diaries:
-            if d.id == diaryId:
-                d.entries.append(entry)
+        entry = Entry(doc)
+        entry.save()
 
-        return jsonify(entry.__dict__)
+        # entry["_id"] = str(entry["_id"])
+        return jsonify(entry)
+        # entry = model.Entry(title)
 
-@app.route('/diaries/<int:diaryId>/entries/<int:entryId>', methods=['GET', 'DELETE', 'PUT'])
+        # for d in diaries:
+        #     if d.id == diaryId:
+        #         d.entries.append(entry)
+
+        # return jsonify(entry.__dict__)
+
+@app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
 def modifyEntries(diaryId, entryId):
-    diary = [diary for diary in diaries if diary.id == diaryId]
+    # diary = [diary for diary in diaries if diary.id == diaryId]
 
-    if not len(diary):
-        return jsonify(error=404, text="diary not found"), 404
+    # if not len(diary):
+    #     return jsonify(error=404, text="diary not found"), 404
 
-    diary = diary[0]
+    # diary = diary[0]
 
-    entries = diary.entries
+    # entries = diary.entries
 
-    entry = [entry for entry in entries if entry['id'] == entryId]
+    # entry = [entry for entry in entries if entry['id'] == entryId]
+    entry = Entry().find_by_id(entryId)
 
     if not len(entry):
         return jsonify(error=404, text="entry not found"), 404
 
-    entry = entry[0]
+    entry = Entry({"_id": entryId, "d_id": diaryId})
+    entry.reload()
 
     if request.method == "GET":
-        return jsonify(entry.json())
+        return jsonify(entry)
     elif request.method == "PUT":
-        title = entry.title
-        text = entry.text
+        entryObj = Entry({"_id": entryId, "d_id": diaryId})
+        entryObj.reload()
+
+        title = entry["title"]
+        text = entry["textBody"]
         tags = []
 
         if request.args.get("title"):
@@ -165,11 +178,14 @@ def modifyEntries(diaryId, entryId):
             text = request.json["text"]
 
         if request.args.get("tags"):
-            tags = request.args.get("tags")
+            return jsonify(error="Tags must be in the request body not in the params"), 400
         elif request.json and request.json["tags"]:
-            tags = request.json["tags"]
+            tags = list(set(request.json["tags"]))
 
-        entry.updateEntry(title, tags, text)
+        entryObj["title"] = title
+        entryObj["textBody"] = text
+        entryObj["tags"] = tags
+        entryObj.save()
 
         return jsonify(success=True)
 
