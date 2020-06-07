@@ -80,7 +80,7 @@ class Entry(Model):
     def make_db_ready(self, entry):
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
-        if entry["tags"]:
+        if 'tags' in entry:
             tags = entry["tags"]
             for i in range(len(tags)):
                 tags[i] = ObjectId(tags[i])
@@ -252,7 +252,6 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
-    # TODO: test
     # if del diary, make sure to del all entries!
     def remove(self):
         if self.reload():
@@ -302,7 +301,7 @@ class Diary(Model):
     #     return res
 
     def make_db_ready(self, diary):
-        if diary["entries"]:
+        if "entries" in diary:
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = ObjectId(entries[i])
