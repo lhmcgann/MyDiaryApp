@@ -70,7 +70,6 @@ def retrieve_diary(diaryId):
     # diary = [diary.json() for diary in diaries if diary.id == diaryId]
 
     diary = Diary().find_by_id(diaryId)
-    print(diary)
 
     if not len(diary):
         return jsonify(error=404, text="diary not found"), 404
@@ -97,9 +96,11 @@ def retrieve_diary(diaryId):
     else:
         return jsonify(error=404, text="not found"), 404
 
-@app.route('/diaries/<int:diaryId>/entries', methods=['GET', 'PUT', 'DELETE', 'POST'])
+@app.route('/diaries/<diaryId>/entries', methods=['GET', 'PUT', 'DELETE', 'POST'])
 def entries(diaryId):
-    diary = [diary for diary in diaries if diary.id == diaryId]
+    # diary = [diary for diary in diaries if diary.id == diaryId]
+
+    diary = Diary().find_by_id(diaryId)
 
     if not len(diary):
         return jsonify(error=404, text="diary not found"), 404
@@ -107,8 +108,10 @@ def entries(diaryId):
     diary = diary[0]
 
     if request.method == "GET":
-        entries = [entry for entry in diary.entries]
-        return jsonify(entries)
+        # entries = [entry for entry in diary.entries]
+        # return jsonify(entries)
+        entries = Entry({"d_id": diaryId}).get_entries()
+        return jsonify(entries), 200
     elif request.method == "POST":
         title = None
         if request.args.get("title"):
