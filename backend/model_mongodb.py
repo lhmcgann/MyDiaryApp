@@ -83,13 +83,6 @@ class Entry(Model):
         else:
             return None
 
-    def get_entries(self):
-        diary = self.get_diary()
-        if diary:
-            return self.make_entries_printable(diary["entries"])
-        else:
-            return None
-
     def make_db_ready(self, entry):
         if '_id' in entry:
             entry["_id"] = ObjectId(entry["_id"])
@@ -146,13 +139,6 @@ class Entry(Model):
         for entry in entries:
             entry = Entry(entry).make_printable(entry)
         return entries
-
-    # def find_by_id(self, entryId):
-    #     entry = list(self.collection.find({"_id": ObjectId(entryId)}))
-    #
-    #     return Entry.make_printable(entry)
-
-
 
     # for internal use mostly (see above save)
     # This entry's _id doesn't need to be a valid entry. This function only
@@ -285,18 +271,11 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-    # def get_all_diaries(self):
-    #     diaries = self.find_all()
-    #
-    #     for diary in diaries:
-    #         diaryId = diary["_id"]  # should be a string
-    #         diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
-
         return diaries
 
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
-        for diary in diaries:  # change ObjectIDs to strs
+        for diary in diaries:  # change all ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
 
@@ -332,14 +311,6 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-    # def find_by_id(self, diaryId):
-    #     diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
-    #     if len(diaries):
-    #         diaryId = str(diaries[0]["_id"])
-    #         diaries[0]["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
-    #
-    #     return diaries
-
     def make_printable(self, diary):
         if '_id' in diary:
             diary["_id"] = str(diary["_id"])
@@ -347,8 +318,6 @@ class Diary(Model):
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = str(entries[i])
-        # diary["_id"] = str(diary["_id"])
-        # diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
@@ -373,7 +342,3 @@ class Diary(Model):
                     entry = entry.make_printable(entry)
                     res.append(entry)
         return res
-
-    # this successfully deletes all from db but html error bc wrong (nul) return
-    # def delete_all(self):
-    #     print("DELETED RESULT:" + str(self.collection.delete_many({}).raw_result))
