@@ -77,13 +77,6 @@ class Entry(Model):
         else:
             return None
 
-    def get_entries(self):
-        diary = self.get_diary()
-        if diary:
-            return self.make_entries_printable(diary["entries"])
-        else:
-            return None
-
     def make_db_ready(self, entry):
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
@@ -323,14 +316,6 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-    # def find_by_id(self, diaryId):
-    #     diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
-    #     if len(diaries):
-    #         diaryId = str(diaries[0]["_id"])
-    #         diaries[0]["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
-    #
-    #     return diaries
-
     def make_printable(self, diary):
         if '_id' in diary:
             diary["_id"] = str(diary["_id"])
@@ -338,8 +323,6 @@ class Diary(Model):
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = str(entries[i])
-        # diary["_id"] = str(diary["_id"])
-        # diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
