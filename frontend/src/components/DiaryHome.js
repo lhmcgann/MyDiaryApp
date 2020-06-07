@@ -38,7 +38,7 @@ class DiaryHome extends Component {
   }
   makeDeleteCall(character){
     return axios.delete('http://localhost:5000/diaries/'+this.props.match.params.d_id+
-    "/entries/"+character.id)
+    "/entries/"+character._id)
     .then(function (response) {
       console.log(response);
       return true;
