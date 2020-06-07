@@ -28,7 +28,7 @@ class Model(dict):
             self = self.make_db_ready(self)
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
-        self._id = str(self._id)
+        self = self.make_printable(self)
 
     def reload(self):
         if self._id:  # if in the db
@@ -315,30 +315,29 @@ class Diary(Model):
         return diary
 
     def make_db_ready(self, diary):
-        diary = super(Diary, self).make_db_ready(diary)
         if diary["entries"]:
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-    def find_by_id(self, diaryId):
-        diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
-        if len(diaries):
-            diaryId = str(diaries[0]["_id"])
-            diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
-
-        return diaries
+    # def find_by_id(self, diaryId):
+    #     diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+    #     if len(diaries):
+    #         diaryId = str(diaries[0]["_id"])
+    #         diaries[0]["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diaryId))
+    #
+    #     return diaries
 
     def make_printable(self, diary):
-        # if '_id' in diary:
-        #     diary["_id"] = str(diary["_id"])
-        # if 'entries' in diary:
-        #     entries = diary["entries"]
-        #     for i in range(len(entries)):
-        #         entries[i] = str(entries[i])
-        diary["_id"] = str(diary["_id"])
-        diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diary["_id"]))
+        if '_id' in diary:
+            diary["_id"] = str(diary["_id"])
+        if 'entries' in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = str(entries[i])
+        # diary["_id"] = str(diary["_id"])
+        # diary["entries"] = Entry.make_entries_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
