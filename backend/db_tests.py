@@ -204,6 +204,7 @@ def test_entry_save_new_with_diary():
     assert res is not None
     assert 'dateCreated' in res
     assert isinstance(res["_id"], ObjectId)
+    res['d_id'] = str(res['d_id'])
     for item in doc:
         assert item in res
         assert doc[item] == res[item]
