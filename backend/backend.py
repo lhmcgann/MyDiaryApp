@@ -11,11 +11,13 @@ import datetime
 app = Flask(__name__)
 CORS(app)
 
+
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
     if request.method == 'GET':
         diaries = Diary().find_all()
         return {"diaries": diaries}, 200
+        # return jsonify([diary.json() for diary in diaries]), 200
     elif request.method == 'POST':
         if request.args.get("title") is not None:
             title = request.args.get("title")
