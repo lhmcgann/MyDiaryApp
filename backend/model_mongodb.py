@@ -107,6 +107,10 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
+    def find_by_id(self, diaryId):
+        diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+        return diaries
+
     def make_printable(self, diary):
         diary["_id"] = str(diary["_id"])
         entries = diary["entries"]
