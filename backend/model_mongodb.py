@@ -88,6 +88,7 @@ class Entry(Model):
             res = diary.reload()
             return (diary if res else None)
         return None
+    
     @staticmethod
     def make_printable(entries):
         for entry in entries:
@@ -149,9 +150,7 @@ class Diary(Model):
 
     def make_printable(self, diary):
         diary["_id"] = str(diary["_id"])
-        entries = diary["entries"]
-        for i in range(len(entries)):
-            entries[i] = str(entries[i])
+        diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     # this successfully deletes all from db but html error bc wrong (nul) return
