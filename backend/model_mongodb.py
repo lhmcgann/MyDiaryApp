@@ -81,6 +81,18 @@ class Entry(Model):
             res = diary.reload()
             return (diary if res else None)
         return None
+
+    @staticmethod
+    def filter_with_tags(entries, tags):
+        def entry_has_tag(entry):
+            entry_tags = set(entry["tags"])
+            for tag in tags:
+                if tag not in entry_tags:
+                    return False
+            return True
+
+        filtered_entries = list(filter(entry_has_tag, entries))
+        return filtered_entries
     
     @staticmethod
     def make_printable(entries):
