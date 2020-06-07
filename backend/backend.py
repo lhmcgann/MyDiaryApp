@@ -75,7 +75,7 @@ def retrieve_diary(diaryId):
     if not len(diary):
         return jsonify(error=404, text="diary not found"), 404
 
-    diary = diary[0]
+    diary = Diary(diary[0])
 
     if request.method == "GET":
         return jsonify(Diary().make_printable(diary))
@@ -84,14 +84,13 @@ def retrieve_diary(diaryId):
         title = request.args.get("title")
 
         if title:
-            diary.title = title
+            diary["title"] = title
+            diary.save()
 
         return jsonify(success=True)
 
     elif request.method == "DELETE":
-        for i, d in enumerate(diaries):
-            if d.id == diaryId:
-                del diaries[i]
+        diary.remove()
 
         return jsonify(success=True)
 
