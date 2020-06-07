@@ -97,13 +97,6 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
-    # TODO: test
-    @staticmethod
-    def get_entries_with_diary_id(diaryId):
-        items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
-        items = Entry.make_entries_printable(items)
-        return items
-
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
@@ -269,6 +262,14 @@ class Diary(Model):
         for diary in diaries:  # change all ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
+
+    # TODO: test
+    def get_entries(self):
+        items = []
+        if self.reload():
+            items = list(Entry.collection.find({"d_id": ObjectId(self._id)}))
+            items = Entry.make_entries_printable(items)
+        return items
 
     # def translate_to_tag_ids(self, tag_names):
     #     res = []

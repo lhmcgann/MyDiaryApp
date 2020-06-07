@@ -140,6 +140,22 @@ def test_diary_remove_with_entries():
     assert Diary.collection.find_one({"title": title}) is None
 
 
+# TODO
+def test_diary_get_entries():
+    title = 'test_diary_get_entries'
+    diary = Diary({'title': title, 'entries': []})
+    diary.save()
+    assert diary.reload() is True
+    did = diary['_id']
+
+    doc1 = {'title': 'get entries 1', 'd_id': did, 'tags': []}
+    e1 = Entry(doc1)
+    e1.save()
+    doc2 = {'title': 'get entries 2', 'd_id': did, 'tags': []}
+    e2 = Entry(doc2)
+    e2.save()
+
+
 def test_entry_get_diary_no_id():
     entry = Entry()
     assert entry.get_diary() is None

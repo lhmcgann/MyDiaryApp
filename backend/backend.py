@@ -41,7 +41,7 @@ def retrieve_diary(diaryId):
 
     if request.method == "GET":
         # frontend expects embedded entries
-        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)
+        diary["entries"] = diary.get_entries()
         return jsonify(diary)
 
     elif request.method == "PUT":
@@ -69,7 +69,7 @@ def entries(diaryId):
         return jsonify(error=404, text="diary not found"), 404
 
     if request.method == "GET":
-        entries = Entry.get_entries_with_diary_id(diaryId)
+        entries = diary.get_entries()
 
         if request.json and "tags" in request.json:
             tags = request.json["tags"]
