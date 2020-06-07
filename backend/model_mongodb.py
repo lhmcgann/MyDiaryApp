@@ -82,7 +82,7 @@ class Entry(Model):
             return super(Entry, self).remove()  # remove from entries collection
         else:
             return None
-            
+
     def get_entries(self):
         diary = self.get_diary()
         if diary:
@@ -120,6 +120,13 @@ class Entry(Model):
         for entry in entries:
             entry["_id"] = str(entry["_id"])
         return entries
+
+    def find_by_id(self, entryId):
+        entry = list(self.collection.find({"_id": ObjectId(entryId)}))
+     
+        return self.make_printable(entry)
+
+
 
     # for internal use mostly (see above save)
     # This entry's _id doesn't need to be a valid entry. This function only
