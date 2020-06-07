@@ -3,7 +3,6 @@ import ssl
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-from operator import itemgetter
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
