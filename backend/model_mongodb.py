@@ -80,6 +80,7 @@ class Entry(Model):
         else:
             return None
 
+
     def make_db_ready(self, entry):
         entry = super(Entry, self).make_db_ready(entry)
         if entry["tags"]:
@@ -96,12 +97,30 @@ class Entry(Model):
             tags[i] = str(tags[i])
         return entry
 
+    def get_entries_with_diary_id(self, diaryId):
+        items = list(self.collection.find({"d_id": diaryId}))
+        return items
+
+
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
         return None
+    
+    @staticmethod
+    def make_printable(entries):
+        for entry in entries:
+            entry["_id"] = str(entry["_id"])
+        return entries
+
+    def find_by_id(self, entryId):
+        entry = list(self.collection.find({"_id": ObjectId(entryId)}))
+     
+        return Entry.make_printable(entry)
+
+
 
     # for internal use mostly (see above save)
     # This entry's _id doesn't need to be a valid entry. This function only
@@ -220,11 +239,21 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
+    def get_all_diaries(self):
+        diaries = self.find_all()
+
+        for diary in diaries:
+            diaryId = str(diary["_id"])
+            diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+
+        return diaries
+
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
+
 
     # tags is a string array of tag names
     def find_by_at_least_one_tag(self, tags):
@@ -238,11 +267,18 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
+    def find_by_id(self, diaryId):
+        diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+        if len(diaries):
+            diaryId = str(diaries[0]["_id"])
+            diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+
+        return diaries
+
+
     def make_printable(self, diary):
         diary["_id"] = str(diary["_id"])
-        entries = diary["entries"]
-        for i in range(len(entries)):
-            entries[i] = str(entries[i])
+        diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diary["_id"]))
         return diary
 
     # this successfully deletes all from db but html error bc wrong (nul) return

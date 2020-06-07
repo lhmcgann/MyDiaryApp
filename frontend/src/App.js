@@ -4,8 +4,6 @@ import DiaryHome from "./components/DiaryHome";
 import ViewEntry from "./components/ViewEntry";
 import { BrowserRouter as Router, Route, Switch} from "react-router-dom";
 import "./styles.css";
-// import { Link } from "react-router-dom";
-// import Button from "react-bootstrap/Button";
 class App extends Component {
   render() {
       return (
