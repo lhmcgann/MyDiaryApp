@@ -109,22 +109,26 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
+    def get_entries_with_diary_id(self, diaryId):
+        items = list(self.collection.find({"d_id": diaryId}))
+        return items
+
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
         return None
-
-    def make_printable(self, entries):
+    @staticmethod
+    def make_printable(entries):
         for entry in entries:
             entry["_id"] = str(entry["_id"])
         return entries
 
     def find_by_id(self, entryId):
         entry = list(self.collection.find({"_id": ObjectId(entryId)}))
-     
-        return self.make_printable(entry)
+
+        return Entry.make_printable(entry)
 
 
 
@@ -252,6 +256,15 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
+    def get_all_diaries(self):
+        diaries = self.find_all()
+
+        for diary in diaries:
+            diaryId = str(diary["_id"])
+            diary["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+
+        return diaries
+
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change ObjectIDs to strs
@@ -293,6 +306,10 @@ class Diary(Model):
 
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
+        if len(diaries):
+            diaryId = str(self._id)
+            diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
+
         return diaries
 
     def make_printable(self, diary):
