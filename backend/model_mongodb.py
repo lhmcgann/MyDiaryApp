@@ -2,6 +2,7 @@ import pymongo
 import ssl
 from pymongo import MongoClient
 from bson import ObjectId
+from datetime import datetime
 
 uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
@@ -16,6 +17,7 @@ class Model(dict):
 
     def save(self):
         if not self._id:
+            self['dateCreated'] = datetime.utcnow()
             self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
             # TODO: any better way to handle _id's?

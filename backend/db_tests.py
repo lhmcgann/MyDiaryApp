@@ -39,8 +39,7 @@ def test_diary_gets_TEST():
 
 
 def test_diary_save_new():
-    doc = {"title": "test_diary_save_new", "dateCreated": "TODO: need Date()",
-           "entries": []}
+    doc = {"title": "test_diary_save_new", "entries": []}
     diary = Diary(doc)
 
     # before save, make sure not in db
@@ -49,6 +48,7 @@ def test_diary_save_new():
     diary.save()
     res = diary.collection.find_one({"title": "test_diary_save_new"})
     assert res is not None
+    assert 'dateCreated' in res
     for item in res:
         assert item in diary
 
@@ -85,7 +85,7 @@ def test_diary_reload_bad_id():
 
 
 def test_diary_reload():
-    diary_model = {"_id": None, "dateCreated": None, "entries": [], "title": ""}
+    diary_model = {"_id": None, "entries": [], "title": ""}
     diary = Diary({"_id": D_ID})
     assert diary.reload() is True
     assert isinstance(diary["_id"], str) is True
@@ -166,8 +166,7 @@ def test_find_entry_in_diary_not_found():
 
 def test_find_entry_in_diary_found():
     title = "test_find_entry_in_diary_found"
-    doc = {"title": title, "tags": [], "textBody": "nothing",
-           "dateCreated": "TODO", "d_id": D_ID}
+    doc = {"title": title, "tags": [], "textBody": "nothing", "d_id": D_ID}
     # put entry in db (to give it an _id) and then find in db
     Entry.collection.insert_one(doc)
     from_db = Entry.collection.find_one({"title": title})
@@ -200,6 +199,7 @@ def test_entry_save_new_with_diary():
 
     res = entry.collection.find_one({"title": title})
     assert res is not None
+    assert 'dateCreated' in res
     assert isinstance(res["_id"], ObjectId)
     for item in doc:
         assert item in res
@@ -371,8 +371,8 @@ def test_add_tag_bad_eid():
 
 
 def test_add_tag_existing():
-    e_doc = {"title": "test_add_tag", "tags": [], "dateCreated": "TODO",
-             "textBody": "nada mucho", "d_id": D_ID}
+    e_doc = {"title": "test_add_tag", "tags": [], "d_id": D_ID,
+             "textBody": "nada mucho"}
     entry = Entry(e_doc)
     entry.save()
     entry.reload()
