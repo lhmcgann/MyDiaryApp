@@ -7,11 +7,30 @@
   height: 50%;
   text-align: center;
 }
+.tag-grid{
+  width: 100%;
+  margin-left: 0%;
+  height: 10%;
+  text-align: center;
+}
 .diary-block{
   width: 30%;
 
   height: 100%;
   font-size: 1.5rem;
+}
+.entry-block{
+  color: white;
+  background-color: gray;
+  width: 20%;
+  padding-bottom: 5%;
+  margin-left: 1%;
+  margin-top: 1%;
+  margin-bottom: 1%;
+  margin-right: 2.5%;
+  font-size: 1.5rem;
+  display: inline-block;
+  text-decoration: none;
 }
 .entry-block{
   color: white;
@@ -33,9 +52,6 @@
 .entry-block:link{
   text-decoration: none;
 
-}
-.textbox{
-  white-space: pre-line;
 }
 .tag{
   margin: 5;
