@@ -97,6 +97,7 @@ class Entry(Model):
                 tags[i] = str(tags[i])
         return entry
 
+    # TODO: test
     @staticmethod
     def get_entries_with_diary_id(diaryId):
         items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
@@ -246,6 +247,7 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
+    # TODO: test
     # if del diary, make sure to del all entries!
     def remove(self):
         if self.reload():
@@ -304,13 +306,6 @@ class Diary(Model):
 
     def make_db_ready(self, diary):
         if "entries" in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = ObjectId(entries[i])
-        return diary
-
-    def make_db_ready(self, diary):
-        if diary["entries"]:
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = ObjectId(entries[i])
