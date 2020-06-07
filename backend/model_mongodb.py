@@ -77,7 +77,7 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(ObjectId(self._id))
+            diary["entries"].remove(self._id)
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
@@ -91,6 +91,10 @@ class Entry(Model):
             return None
 
     def make_db_ready(self, entry):
+        if '_id' in entry:
+            entry["_id"] = ObjectId(entry["_id"])
+        if 'd_id' in entry:
+            entry["d_id"] = ObjectId(entry["d_id"])
         if entry["tags"]:
             tags = entry["tags"]
             for i in range(len(tags)):
