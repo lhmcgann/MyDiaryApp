@@ -20,19 +20,17 @@ class Model(dict):
         else:  # if has _id, must already be added (bc insert() creates the _id)
             # TODO: any better way to handle _id's?
             id = self["_id"]
-            self = self.make_db_ready(self)
+            del self["_id"]
             self.collection.update_one({"_id": ObjectId(id)}, {'$set': self})
             self["_id"] = id
-        self = self.make_printable(self)
+        self._id = str(self._id)
 
     def reload(self):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
-                self.update(result)  # updates created doc (w/ id) to full doc
-                # TODO: call a make_printable() function?
-                # self._id = str(self._id)  # may also need to convert entry ids
-                self.make_printable(self)
+                self.update(result)  # updates created Diary (w/ id) to full doc
+                self._id = str(self._id)  # may also need to convert entry ids
                 return True
         return False
 
@@ -42,13 +40,6 @@ class Model(dict):
             self.clear()
             return resp
         return None
-
-    def make_db_ready(self, toDB):
-        del toDB["_id"]
-        return toDB
-
-    def make_printable(self, toPrintable):
-        return toPrintable
 
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
@@ -74,33 +65,15 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(self._id)
+            diary["entries"].remove(ObjectId(self._id))
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
             return None
 
-
-    def make_db_ready(self, entry):
-        entry = super(Entry, self).make_db_ready(entry)
-        if entry["tags"]:
-            tags = entry["tags"]
-            for i in range(len(tags)):
-                tags[i] = ObjectId(tags[i])
-        return entry
-
-    def make_printable(self, entry):
-        entry["_id"] = str(entry["_id"])
-        entry["d_id"] = str(entry["d_id"])
-        tags = entry["tags"]
-        for i in range(len(tags)):
-            tags[i] = str(tags[i])
-        return entry
-
     def get_entries_with_diary_id(self, diaryId):
         items = list(self.collection.find({"d_id": diaryId}))
         return items
-
 
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
@@ -132,100 +105,6 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
-    # title is the unique tag title. If new tag, create tag
-    def add_tag(self, title):
-        if self._id and self.reload():
-            tag = Tag().find_by_title(title, self.d_id)
-            # if new tag, create in db
-            if tag is None:
-                Tag({"title": title, "d_id": self.d_id}).save()
-                tag = Tag().find_by_title(title, self.d_id)
-            self["tags"].append(tag["_id"])
-            self.save()
-            return True
-        return False
-
-    def delete_tag(self, title):
-        if self._id and self.reload():
-            tag = Tag().find_by_title(title, self.d_id)
-            if tag is not None:
-                tag.reload()
-                id = tag["_id"]
-                self["tags"].remove(id)
-                self.save()
-                return True
-                # return tag.remove() --> don't wan't to actually del from DB!
-        return False
-
-
-class Tag(Model):
-    cluster = pymongo.MongoClient(uri)
-    dbStr = "myDiaryApp"
-    db = cluster[dbStr]
-    collection = db["tags"]
-
-    def save(self):
-        if self._id:
-            super(Tag, self).save()
-        elif self.title and self.d_id:
-            diary = self.get_diary(self.d_id)
-            if diary:
-                tag = self.find_by_title(self.title, self.d_id)
-                if tag:
-                    self['_id'] = tag['_id']
-                super(Tag, self).save()
-
-    def get_diary(self, diary):
-        if self.d_id:           # if diary id (so diary should exist)
-            diary = Diary({"_id": self.d_id})
-            res = diary.reload()
-            return (diary if res else None)
-        return None
-
-    def reload(self):
-        if self._id:
-            return super(Tag, self).reload()
-        elif self.title and self.d_id:
-            tag = self.find_by_title(self.title, self.d_id)
-            if tag:
-                self.update(tag)
-                return True
-        return False
-
-    def remove(self):
-        if self.title and self.d_id:
-            self = self.find_by_title(self.title, self.d_id)
-            if not self:
-                return -1
-            diary = Diary({'_id': self.d_id})
-            diary.reload()
-            count = 0
-            for entry_id in diary['entries']:
-                entry = Entry({'_id': entry_id})
-                entry.reload()
-                if self._id in entry['tags']:
-                    entry['tags'].remove(self._id)
-                    entry.save()
-                    count = count + 1
-            if super(Tag, self).remove():
-                return count
-        return None
-
-    # shouldn't be tags with same title in same diary --> can use title to get
-    def find_by_title(self, title, d_id):
-        tags = list(self.collection.find({"title": title, 'd_id': d_id}))
-        if len(tags) > 0:
-            tag = self.make_printable(Tag(tags[0]))
-            return tag
-        return None
-
-    def make_printable(self, tag):
-        if '_id' in tag:
-            tag["_id"] = str(tag["_id"])
-        if 'd_id' in tag:
-            tag["d_id"] = str(tag["d_id"])
-        return tag
-
 
 class Diary(Model):
     cluster = pymongo.MongoClient(uri)
@@ -254,19 +133,6 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-
-    # tags is a string array of tag names
-    def find_by_at_least_one_tag(self, tags):
-        return None
-
-    def make_db_ready(self, diary):
-        diary = super(Diary, self).make_db_ready(diary)
-        if diary["entries"]:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = ObjectId(entries[i])
-        return diary
-
     def find_by_id(self, diaryId):
         diaries = list(self.collection.find({"_id": ObjectId(diaryId)}))
         if len(diaries):
@@ -274,7 +140,6 @@ class Diary(Model):
             diaries[0]["entries"] = Entry.make_printable(Entry().get_entries_with_diary_id(diaryId))
 
         return diaries
-
 
     def make_printable(self, diary):
         diary["_id"] = str(diary["_id"])
