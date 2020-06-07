@@ -70,6 +70,13 @@ class Entry(Model):
             return super(Entry, self).remove()  # remove from entries collection
         else:
             return None
+            
+    def get_entries(self):
+        diary = self.get_diary()
+        if diary:
+            return self.make_printable(diary["entries"])
+        else:
+            return None
 
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
@@ -77,6 +84,11 @@ class Entry(Model):
             res = diary.reload()
             return (diary if res else None)
         return None
+
+    def make_printable(self, entries):
+        for entry in entries:
+            entry["_id"] = str(entry["_id"])
+        return entries
 
     # for internal use mostly (see above save)
     # This entry's _id doesn't need to be a valid entry. This function only
