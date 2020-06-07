@@ -4,14 +4,15 @@ import DiaryButton from "./DiaryButton";
 import axios from "axios";
 class Home extends Component {
 
-  state = { characters: [] };
+  state = { diaries: [] };
 
   componentDidMount() {
     axios
       .get("http://localhost:5000/diaries")
       .then((res) => {
-        const characters = res.data; //.diaries;
-        this.setState({ characters });
+        const diaries = res.data.diaries;
+        console.log(diaries);
+        this.setState({ diaries });
       })
       .catch(function (error) {
         //Not handling the error. Just logging into the console.
@@ -21,7 +22,7 @@ class Home extends Component {
   handleSubmit = (title) => {
     this.makePostCall(title).then((callResult) => {
       if (callResult !== false) {
-        this.setState({ characters: [...this.state.characters, callResult] });
+        this.setState({ diaries: [...this.state.diaries, callResult] });
       }
     });
   };
@@ -38,8 +39,8 @@ class Home extends Component {
         return false;
       });
   }
-  makeDeleteCall(character){
-    return axios.delete('http://localhost:5000/diaries/'+character.id)
+  makeDeleteCall(diary){
+    return axios.delete('http://localhost:5000/diaries/'+diary._id)
     .then(function (response) {
       console.log(response);
       return true;
@@ -49,13 +50,13 @@ class Home extends Component {
       return false;
     });
   }
-  removeCharacter = index => {
-    const {characters} = this.state;
-    const character = characters[index];
-    this.makeDeleteCall(character).then((callResult) => {
+  removeDiary = index => {
+    const {diaries} = this.state;
+    const diary = diaries[index];
+    this.makeDeleteCall(diary).then((callResult) => {
       if (callResult !== false){
         this.setState({
-          characters: characters.filter((character, i) => {
+          diaries: diaries.filter((diary, i) => {
             return i !== index
           }),
         })
@@ -63,11 +64,11 @@ class Home extends Component {
     });
   }
   render() {
-    const { characters } = this.state;
+    const { diaries } = this.state;
     return (
       <div className="centered">
         <h1>Welcome to MyDiary</h1>
-        <DiaryList characterData={characters} removeCharacter={this.removeCharacter}/>
+        <DiaryList diaryData={diaries} removeDiary={this.removeDiary}/>
         <DiaryButton handleSubmit={this.handleSubmit}/>
       </div>
     );
