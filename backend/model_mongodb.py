@@ -261,6 +261,15 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
+    # if del diary, make sure to del all entries!
+    def remove(self):
+        if self.reload():
+            for entry_id in self['entries']:
+                # should already be strs but just in case
+                entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
+                entry.remove()
+        return super(Diary, self).remove()
+
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
