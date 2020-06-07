@@ -100,6 +100,38 @@ def entries(diaryId):
 
         return jsonify(entry)
 
+@app.route('/diaries/<diaryId>/entries/<entryId>/tags/<tag>', methods=['DELETE', 'POST'])
+def modifyTags(diaryId, entryId, tag):
+    print(tag)
+    entry = Entry().find_by_id(entryId)
+
+    if not len(entry):
+        return jsonify(error=404, text="entry not found"), 404
+
+    entry = Entry({"_id": entryId, "d_id": diaryId})
+    entry.reload()
+
+    if request.method == "DELETE":
+        tags = entry["tags"]
+        if tag not in tags:
+            return jsonify(error="Tag not found"), 404
+        else:
+            entry["tags"].remove(tag)
+            entry.save()
+            return jsonify(sucess=True)
+    elif request.method == "POST":
+        tags = entry["tags"]
+
+        if tag in tags:
+            return jsonify(error="No duplicate tags"), 400
+        else:
+            entry["tags"].append(tag)
+            entry.save()
+            return jsonify(sucess=True)
+
+
+
+
 @app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
 def modifyEntries(diaryId, entryId):
     entry = Entry({'_id': entryId, 'd_id': diaryId})
