@@ -3,7 +3,6 @@ import DiaryList from "./DiaryList";
 import DiaryButton from "./DiaryButton";
 import axios from "axios";
 class Home extends Component {
-
   state = { diaries: [] };
 
   componentDidMount() {
@@ -39,37 +38,38 @@ class Home extends Component {
         return false;
       });
   }
-  makeDeleteCall(diary){
-    return axios.delete('http://localhost:5000/diaries/'+diary._id)
-    .then(function (response) {
-      console.log(response);
-      return true;
-    })
-    .catch(function (error) {
-      console.log(error);
-      return false;
-    });
+  makeDeleteCall(diary) {
+    return axios
+      .delete("http://localhost:5000/diaries/" + diary._id)
+      .then(function (response) {
+        console.log(response);
+        return true;
+      })
+      .catch(function (error) {
+        console.log(error);
+        return false;
+      });
   }
-  removeDiary = index => {
-    const {diaries} = this.state;
+  removeDiary = (index) => {
+    const { diaries } = this.state;
     const diary = diaries[index];
     this.makeDeleteCall(diary).then((callResult) => {
-      if (callResult !== false){
+      if (callResult !== false) {
         this.setState({
           diaries: diaries.filter((diary, i) => {
-            return i !== index
+            return i !== index;
           }),
-        })
+        });
       }
     });
-  }
+  };
   render() {
     const { diaries } = this.state;
     return (
       <div className="centered">
         <h1>Welcome to MyDiary</h1>
-        <DiaryList diaryData={diaries} removeDiary={this.removeDiary}/>
-        <DiaryButton handleSubmit={this.handleSubmit}/>
+        <DiaryList diaryData={diaries} removeDiary={this.removeDiary} />
+        <DiaryButton handleSubmit={this.handleSubmit} />
       </div>
     );
   }

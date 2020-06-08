@@ -1,26 +1,23 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 const DiaryListBody = (props) => {
   const rows = props.diaryData.map((row, index) => {
     return (
-      <div className="centered">
+      <div className="centered" key={index}>
         <h5 key={index}>
           <Link to={`diaries/${row._id}`}>
-            <button class="diary-block">{row.title}</button>
+            <button className="diary-block">{row.title}</button>
           </Link>
           <button onClick={() => props.removeDiary(index)}>Delete</button>
         </h5>
       </div>
     );
   });
-  return <tbody>{rows}</tbody>;
+  return <div>{rows}</div>;
 };
 const DiaryList = (props) => {
-  const { diaryData, removeDiary} = props;
-  return (
-    <table>
-      <DiaryListBody diaryData={diaryData} removeDiary={removeDiary} />
-    </table>
-  );
+  const { diaryData, removeDiary } = props;
+  return <DiaryListBody diaryData={diaryData} removeDiary={removeDiary} />;
 };
 export default DiaryList;
