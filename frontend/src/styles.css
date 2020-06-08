@@ -1,25 +1,19 @@
-.centered{
+.centered {
   text-align: center;
 }
-.entry-grid{
+.entry-grid {
   width: 50%;
   margin-left: 25%;
   height: 50%;
   text-align: center;
 }
-.tag-grid{
-  width: 100%;
-  margin-left: 0%;
-  height: 10%;
-  text-align: center;
-}
-.diary-block{
+.diary-block {
   width: 30%;
 
   height: 100%;
   font-size: 1.5rem;
 }
-.entry-block{
+.entry-block {
   color: white;
   background-color: gray;
   width: 20%;
@@ -32,31 +26,61 @@
   display: inline-block;
   text-decoration: none;
 }
-.entry-block{
-  color: white;
-  background-color: gray;
-  width: 20%;
-  padding-bottom: 5%;
-  margin-left: 1%;
-  margin-top: 1%;
-  margin-bottom: 1%;
-  margin-right: 2.5%;
-  font-size: 1.5rem;
-  display: inline-block;
-  text-decoration: none;
-}
-.entry-block:hover{
+.entry-block:hover {
   background-color: green;
   color: white;
 }
-.entry-block:link{
+.entry-block:link {
   text-decoration: none;
-
 }
-.tag{
+.dropbtn {
+  background-color: #4caf50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.dropdown-content a {
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}
+.textbox {
+  white-space: pre-line;
+}
+.tag {
   margin: 5;
 }
 textarea {
-    padding: 20px;
-    margin: 20px;
+  padding: 20px;
+  margin: 20px;
 }
