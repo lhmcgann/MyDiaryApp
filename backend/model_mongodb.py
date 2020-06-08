@@ -5,8 +5,7 @@ from bson import ObjectId
 from datetime import datetime
 import time
 
-URI = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/\
-        test?w=majority'
+URI = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
 
 class Model(dict):
