@@ -72,7 +72,7 @@ class Entry(Model):
 
     def save(self):
         """
-        Save this diary to the db.
+        Save this Entry to the db.
 
         Insert if new, else update existing.
         return: None if failed, True if inserted new, False if updated existing
@@ -213,10 +213,14 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
-    # create a Tag with a title in a specific diary. The title will be unique to
-    #   the Diary so if the title is already in the Diary, it will be updated
-    #   rather than creating another tag with the same title.
     def save(self):
+        """
+        Save this Tag to the db.
+
+        Tag titles are unique within Diaries, so if the title is already in the
+        Diary with the d_id of this Tag, the tag will be updated rather than
+        creating another tag with the same title.
+        """
         if self._id:
             super(Tag, self).save()
         elif self.title and self.d_id:
@@ -227,9 +231,12 @@ class Tag(Model):
                     self['_id'] = tag['_id']
                 super(Tag, self).save()
 
-    # Fills this Tag with the rest of its information from the db and makes this
-    #   Tag printable. Returns True on success, False on failure.
     def reload(self):
+        """
+        Fills this Tag with the rest of its information from the db.
+
+        Makes this Tag printable. Returns True on success, False on failure.
+        """
         if self._id:
             return super(Tag, self).reload()
         elif self.title and self.d_id:
@@ -239,10 +246,13 @@ class Tag(Model):
                 return True
         return False
 
-    # remove this Tag from the database and from all Entries it is in. returns
-    #   the number of Entries this Tag was removed from, or None on failure
-    #   (this Tag object must contain an _id or a title and diary id (d_id)).
     def remove(self):
+        """
+        Remove this Tag from the database and from all Entries it is in.
+
+        Returns the number of Entries this Tag was removed from, or None on
+        failure (this Tag object must contain an _id or a title and diary id).
+        """
         if self.title and self.d_id:
             self = self.find_by_title(self.title, self.d_id)
             if not self:
@@ -261,31 +271,38 @@ class Tag(Model):
                 return count
         return None
 
-    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, tag):
+        """ Convert any string _ids to ObjectIds for storage in the db """
         if 'd_id' in tag:
             tag["d_id"] = ObjectId(tag["d_id"])
         return tag
 
-    # convert any ObjectIds to strings
     def make_printable(self, tag):
+        """ Convert any ObjectIds to strings """
         if '_id' in tag:
             tag["_id"] = str(tag["_id"])
         if 'd_id' in tag:
             tag["d_id"] = str(tag["d_id"])
         return tag
 
-    # return the full, printable Diary object, if there is one for this Tag,
-    #   else return None
     def get_diary(self, diary):
+        """
+        Get the Diary object of the Diary this Tag is in.
+
+        Returns the full, printable Diary object if there is one, else None.
+        """
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
         return None
 
-    # shouldn't be tags with same title in same diary --> can use title to get
     def find_by_title(self, title, d_id):
+        """
+        Find a Tag with the given title in the Diary with the given _id.
+
+        Return the printable Tag on success, else None.
+        """
         tags = list(self.collection.find({"title": title,
                                           'd_id': ObjectId(d_id)}))
         if len(tags) > 0:
@@ -300,8 +317,10 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
-    # if del diary, make sure to del all entries!
     def remove(self):
+        """
+        Remove this Diary and all of its Entries and Tags from the db.
+        """
         if self.reload():
             for tag in self.get_tags():
                 t = Tag(tag)
@@ -313,16 +332,16 @@ class Diary(Model):
                 entry.remove()
         return super(Diary, self).remove()
 
-    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, diary):
+        """ Convert any string _ids to ObjectIds for storage in the db """
         if "entries" in diary:
             entries = diary["entries"]
             for i in range(len(entries)):
                 entries[i] = ObjectId(entries[i])
         return diary
 
-    # convert any ObjectIds to strings
     def make_printable(self, diary):
+        """ Convert any ObjectIds to strings """
         if '_id' in diary:
             diary["_id"] = str(diary["_id"])
         if 'entries' in diary:
@@ -331,39 +350,51 @@ class Diary(Model):
                 entries[i] = str(entries[i])
         return diary
 
-    # return a list of all diaries in the db as printable Diary objects
     def find_all(self):
+        """
+        Return a list of all Diaries in the db as printable Diary objects.
+        """
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
             diary = self.make_printable(diary)
         return diaries
 
-    # return a list of printable Diary objects that match the given title
     def find_by_title(self, title):
+        """
+        Return a list of printable Diary objects that match the given title.
+        """
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change all ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
 
-    # return a list of this Diary's entries as full, printable Entry objects
     def get_entries(self):
+        """
+        Return a list of this Diary's Entries as full, printable Entry objects.
+        """
         items = []
         if self.reload():
             items = list(Entry.collection.find({"d_id": ObjectId(self._id)}))
             items = Entry.make_entries_printable(items)
         return items
 
-    # return a list of this Diary's tags as full, printable Tag objects
     def get_tags(self):
+        """
+        Return a list of this Diary's tags as full, printable Tag objects.
+        """
         items = []
         if self._id:
             items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
         return items
 
-    # return a list of this Diary's entries as full, printable Entry objects
-    #   sorted by dateCreated. recent_first=True (default) if want to sort by
-    #   most recent first. recent_first=False to sort by most recent last.
     def sort_entries_by_date_created(self, recent_first=True):
+        """
+        Sort this Diary's entries by date created.
+
+        recent_first=True (default) to sort by most recent first.
+        recent_first=False to sort by most recent last.
+        Return a list of the sorted Entries as full, printable Entry objects.
+        """
         sort = []
         if self.reload():
             for entry_id in self['entries']:
@@ -375,9 +406,13 @@ class Diary(Model):
                           reverse=recent_first)
         return sort
 
-    # return a list of this Diary's entries as full, printable Entry objects
-    #   that conatain (in their title or text body) the text to search for
     def search_entries_for_text(self, string):
+        """
+        Search this Diary's Entries for a text string.
+
+        Return a list of Entries (as full, printable Entry objects) that contain
+        (in their title or text body) the text string to search for.
+        """
         res = []
         if self.reload():
             for entry_id in self['entries']:
