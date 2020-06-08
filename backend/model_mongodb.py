@@ -89,6 +89,7 @@ class Entry(Model):
             entry["d_id"] = str(entry["d_id"])
         return entry
 
+    # return the given list of Entry objects as a list printable objects
     @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
@@ -114,15 +115,16 @@ class Entry(Model):
             return (diary if res else None)
         return None
 
-        filtered_entries = list(filter(entry_has_tag, entries))
-        return filtered_entries
-
+    # return True is this Entry has the Tag with the given title, False if not
+    #   return None reload error
     def has_tag(self, title):
         if self.reload():
             return title in self['tags']
         return None
 
-    # title is the unique tag title. If new tag, create tag
+    # title is the unique tag title. If new tag, create tag first
+    #   If a tag with the given title is already in this Entry, a duplicate
+    #   will not be added.
     def add_tag(self, title):
         if self._id and self.reload() and not self.has_tag(title):
             tag = Tag().find_by_title(title, self.d_id)
@@ -134,6 +136,8 @@ class Entry(Model):
             return True
         return False
 
+    # Delete the Tag with the given title from this entry. returns True if
+    #   successful, False if not.
     def delete_tag(self, title):
         if self._id and self.reload():
             tag = Tag().find_by_title(title, self.d_id)
@@ -143,6 +147,8 @@ class Entry(Model):
                 return True
         return False
 
+    # return a list of Entries in entries that contain all tags in the given
+    #   list of Tag titles
     @staticmethod
     def filter_with_tags(entries, tags):
         def entry_has_tag(entry):
@@ -151,6 +157,9 @@ class Entry(Model):
                 if tag not in entry_tags:
                     return False
             return True
+
+        filtered_entries = list(filter(entry_has_tag, entries))
+        return filtered_entries
 
 
 class Tag(Model):
