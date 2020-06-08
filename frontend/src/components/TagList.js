@@ -7,14 +7,10 @@ const TagListBody = (props) => {
       </div>
     );
   });
-  return <tbody>{rows}</tbody>;
+  return <div>{rows}</div>;
 };
 const TagList = (props) => {
   const { tagListData } = props;
-  return (
-    <table>
-      <TagListBody tagListData={tagListData} />
-    </table>
-  );
+  return <TagListBody tagListData={tagListData} />;
 };
 export default TagList;
