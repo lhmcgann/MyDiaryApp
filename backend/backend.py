@@ -72,12 +72,13 @@ def entries(diaryId):
 
     if request.method == "GET":
         entries = diary.get_entries()
+        tags = request.args.get("tags")
+        sortBy = request.args.get("sortBy")
 
-        if request.json and "tags" in request.json:
-            tags = request.json["tags"]
+        if tags:
             entries = Entry.filter_with_tags(entries, tags)
-        if request.json and "sortBy" in request.json:
-            sortBy = request.json["sortBy"].lower()
+        if sortBy:
+            sortBy = sortBy.lower()
             sortBy_to_ascending = {"mostrecent": True, "leastrecent": False}
 
             if sortBy in sortBy_to_ascending:
