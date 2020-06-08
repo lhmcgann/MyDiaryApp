@@ -13,11 +13,13 @@ NUM_ENTRIES = 5
 
 def test_setup():
     # enter "test mode": use testing db
-    Entry.dbStr = Diary.dbStr = "tests"
+    Entry.dbStr = Diary.dbStr = Tag.dbStr = "tests"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
+    Tag.db = Tag.cluster[Tag.dbStr]
+    Tag.collection = Tag.db["tags"]
 
     assert len(list(Entry.collection.find())) == NUM_ENTRIES
     assert Diary.collection.find_one({"_id": ObjectId(D_ID)}) is not None
@@ -26,7 +28,7 @@ def test_setup():
 def test_entry_gets_TEST():
     entry = Entry()
     clxns = entry.db.list_collection_names()
-    expect = ["tests", "diaries", "entries"]
+    expect = ["tests", "tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -34,7 +36,7 @@ def test_entry_gets_TEST():
 def test_diary_gets_TEST():
     diary = Diary()
     clxns = diary.db.list_collection_names()
-    expect = ["tests", "diaries", "entries"]
+    expect = ["tests", "tags", "diaries", "entries"]
     for item in clxns:
         assert item in expect
 
@@ -245,7 +247,10 @@ def test_entry_save_new_with_diary():
     # check entry _id got into diary's entries array
     diary = Diary({"_id": D_ID})
     diary.reload()
-    assert res["_id"] in diary["entries"]
+    assert isinstance(diary["_id"], str)
+    for e in diary["entries"]:
+        assert isinstance(e, str)
+    assert str(res["_id"]) in diary["entries"]
 
 
 def test_entry_save_old_with_diary():
@@ -269,7 +274,7 @@ def test_entry_save_old_with_diary():
     diary.reload()
     count = 0
     for id in diary["entries"]:
-        if (id == res["_id"]):
+        if (id == str(res["_id"])):
             count = count + 1
     assert count == 1
 
@@ -758,11 +763,13 @@ def test_end():
     assert len(list(Entry.collection.find())) == NUM_ENTRIES
 
     # set references back to main db
-    Entry.dbStr = Diary.dbStr = "myDiaryApp"
+    Entry.dbStr = Diary.dbStr = Tag.dbStr = "myDiaryApp"
     Entry.db = Entry.cluster[Entry.dbStr]
     Entry.collection = Entry.db["entries"]
     Diary.db = Diary.cluster[Diary.dbStr]
     Diary.collection = Diary.db["diaries"]
+    Tag.db = Tag.cluster[Tag.dbStr]
+    Tag.collection = Tag.db["tags"]
 
 
 # def test_find_all_diaries():
