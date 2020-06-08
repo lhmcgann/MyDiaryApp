@@ -256,7 +256,6 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-    # TODO: test
     def get_entries(self):
         items = []
         if self.reload():

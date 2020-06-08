@@ -147,6 +147,12 @@ def test_find_all_diaries():
     assert len(diaries) == 3
 
 
+def test_find_by_title_diaries():
+    diaries = Diary().find_by_title("Test 1")
+    assert len(diaries) == 1
+    assert diaries[0]['title'] == "Test 1"
+
+
 def test_diary_get_entries():
     title = 'test_diary_get_entries'
     diary = Diary({'title': title, 'entries': []})
@@ -166,6 +172,10 @@ def test_diary_get_entries():
     assert entries == docs
 
     diary.remove()
+
+
+def test_tag_get_diary():
+    assert Tag().get_diary(Diary()) is None
 
 
 def test_entry_get_diary_no_id():
