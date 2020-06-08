@@ -64,6 +64,18 @@ class Model(dict):
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
+    """
+    An Entry document.
+
+    Fields
+    - _id: unique to this document; automatically generated on creation
+    - title: the string title
+    - dateCreated: the datetime this Entry was created; automatically generated
+        on creation
+    - textBody: the text body
+    - tags: a list of titles of associated Tags
+    - d_id: the ObjectId of the Diary this Entry is in
+    """
     cluster = pymongo.MongoClient(URI, ssl=True,
                                   tlsAllowInvalidCertificates=False)
     dbStr = "myDiaryApp"
@@ -208,6 +220,16 @@ class Entry(Model):
 
 
 class Tag(Model):
+    """
+    A Tag document.
+
+    Fields
+    - _id: unique to this document; automatically generated on creation
+    - title: the string title
+    - dateCreated: the datetime this Tag was created; automatically generated
+        on creation
+    - d_id: the ObjectId of the Diary this Tag is in
+    """
     cluster = pymongo.MongoClient(URI)
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
@@ -312,6 +334,16 @@ class Tag(Model):
 
 
 class Diary(Model):
+    """
+    A Diary document.
+
+    Fields
+    - _id: unique to this document; automatically generated on creation
+    - title: the string title
+    - dateCreated: the datetime this Tag was created; automatically generated
+        on creation
+    - entries: a list of the ObjectIds of all Entries in this Diary
+    """
     cluster = pymongo.MongoClient(URI)
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
