@@ -69,7 +69,7 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(ObjectId(self._id))
+            diary["entries"].remove(self._id)
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
@@ -114,11 +114,22 @@ class Entry(Model):
             entry = Entry(entry).make_printable(entry)
         return entries
 
+    # for internal use mostly (see above save)
+    # This entry's _id doesn't need to be a valid entry. This function only
+    #   checks if the specified _id is in the given diary JSON object.
+    def find_entry_in_diary(self, diary):
+        if diary and self._id:
+            for id in diary["entries"]:  # entries = [ObjectIds]
+                if self._id == str(id):
+                    return self.collection.find_one({"_id": ObjectId(self._id)})
+        return None
+
     # TODO: test
     def has_tag(self, title):
         if self.reload():
             return title in self['tags']
         return None
+
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and not self.has_tag(title):
@@ -129,6 +140,7 @@ class Entry(Model):
             self["tags"].append(title)
             self.save()
             return True
+        return False
 
     def delete_tag(self, title):
         if self._id and self.reload():
@@ -138,6 +150,13 @@ class Entry(Model):
                 self.save()
                 return True
         return False
+
+
+class Tag(Model):
+    cluster = pymongo.MongoClient(uri)
+    dbStr = "myDiaryApp"
+    db = cluster[dbStr]
+    collection = db["tags"]
 
     def save(self):
         if self._id:
@@ -157,7 +176,15 @@ class Entry(Model):
             return (diary if res else None)
         return None  # TODO: test
 
-        return Entry.make_printable(entry)
+    def reload(self):
+        if self._id:
+            return super(Tag, self).reload()
+        elif self.title and self.d_id:
+            tag = self.find_by_title(self.title, self.d_id)
+            if tag:
+                self.update(tag)
+                return True
+        return False
 
     def remove(self):
         if self.title and self.d_id:
@@ -197,17 +224,6 @@ class Entry(Model):
         if 'd_id' in tag:
             tag["d_id"] = str(tag["d_id"])
         return tag
-
-
-    # for internal use mostly (see above save)
-    # This entry's _id doesn't need to be a valid entry. This function only
-    #   checks if the specified _id is in the given diary JSON object.
-    def find_entry_in_diary(self, diary):
-        if diary and self._id:
-            for id in diary["entries"]:  # entries = [ObjectIds]
-                if self._id == str(id):
-                    return self.collection.find_one({"_id": ObjectId(self._id)})
-        return None
 
 
 class Diary(Model):
@@ -322,3 +338,4 @@ class Diary(Model):
                     entry = entry.make_printable(entry)
                     res.append(entry)
         return res
+
