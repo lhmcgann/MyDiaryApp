@@ -11,13 +11,11 @@ import datetime
 app = Flask(__name__)
 CORS(app)
 
-
 @app.route('/diaries', methods=['GET', 'POST'])
 def retrieve_diaries():
     if request.method == 'GET':
-        diaries = Diary().find_all()
+        diaries = Diary().get_all_diaries()
         return {"diaries": diaries}, 200
-        # return jsonify([diary.json() for diary in diaries]), 200
     elif request.method == 'POST':
         if request.args.get("title") is not None:
             title = request.args.get("title")
@@ -26,7 +24,7 @@ def retrieve_diaries():
         else:
             return jsonify(error="need to enter a title"), 400
 
-        newDiary = Diary({"title": title, "entries": [], "dateCreated": datetime.datetime.now()})
+        newDiary = Diary({"title": title, "entries": [], "dateCreated": datetime.datetime.utcnow()})
         newDiary.save()
         resp = jsonify(newDiary.make_printable(newDiary)), 200
         return resp
@@ -95,7 +93,6 @@ def entries(diaryId):
             return jsonify(error="Need a title to create entry"), 400
 
         doc = {"d_id": diaryId, "tags": [], "textBody": "", "title": title}
-
         entry = Entry(doc)
         entry.save()
 
