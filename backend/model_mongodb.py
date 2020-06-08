@@ -94,7 +94,6 @@ class Entry(Model):
             return (diary if res else None)
         return None
 
-    # TODO: test
     @staticmethod
     def filter_with_tags(entries, tags):
         def entry_has_tag(entry):
@@ -172,7 +171,7 @@ class Tag(Model):
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
-        return None  # TODO: test
+        return None
 
     def reload(self):
         if self._id:
@@ -249,7 +248,6 @@ class Diary(Model):
             diary = self.make_printable(diary)
         return diaries
 
-    # TODO: test
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change all ObjectIDs to strs

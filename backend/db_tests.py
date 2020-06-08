@@ -657,6 +657,28 @@ def test_has_tag_false():
     entry.remove()
 
 
+def test_filter_tags():
+    e1 = Entry({'title': 'e1', 'd_id': D_ID, 'tags': [], 'textBody': "na"})
+    e1.save()
+    e1.reload()
+    e2 = Entry({'title': 'e2', 'd_id': D_ID, 'tags': [], 'textBody': "na2"})
+    e2.save()
+    e2.reload()
+
+    e1.add_tag('t1')
+    e1.reload()
+    entries = [e1, e2]
+    res = Entry.filter_with_tags(entries, ['t1'])
+    assert len(res) == 1
+    assert res[0] == e1
+
+    t1 = Tag({'title': 't1', 'd_id': D_ID})
+    t1.reload()
+    t1.remove()
+    e1.remove()
+    e2.remove()
+
+
 def test_sort_entries_no_id():
     assert Diary().sort_entries_by_date_created() == []
 
