@@ -4,7 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
-      <div>
+      <div className="centered" key={index}>
         <Link
           className="entry-block"
           to={`${window.location.pathname}/entries/${row._id}`}
@@ -16,14 +16,10 @@ const EntryListBody = (props) => {
     );
   });
 
-  return <tbody>{rows}</tbody>;
+  return <div>{rows}</div>;
 };
 const EntryList = (props) => {
   const { entryData, removeEntry } = props;
-  return (
-    <table>
-      <EntryListBody entryData={entryData} removeEntry={removeEntry} />
-    </table>
-  );
+  return <EntryListBody entryData={entryData} removeEntry={removeEntry} />;
 };
 export default EntryList;

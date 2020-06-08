@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
 const DiaryListBody = (props) => {
   const rows = props.diaryData.map((row, index) => {
     return (
