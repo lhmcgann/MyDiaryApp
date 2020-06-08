@@ -96,7 +96,7 @@ class DiaryHome extends Component {
     return (
       <div className="centered">
         <div className="dropdown">
-          <button className="dropbtn">Dropdown</button>
+          <button className="dropbtn">Sort By</button>
           <div className="dropdown-content">
             <div>
               <button onClick={() => this.sortRecency("mostRecent")}>
