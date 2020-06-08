@@ -15,3 +15,20 @@ https://www.figma.com/file/UlfzbnwB736Uien6Gj9IHU/MyDiaryApp?node-id=0%3A1
 
 Use Case Diagram and Class Diagram:
 https://github.com/lhmcgann/MyDiaryApp/wiki
+
+Development Environment Setup
+
+Instructions to Run Backend
+1. clone the repository
+2. cd into the backend directory
+3. Activate the python virtual environment by running "source python_env/bin/activate"
+4. Run flask using flask run
+5. Send appropriate API requests following the API design doc in the docs folder of the repository
+
+Instructions to Run FrontEnd
+
+
+Travis CI Link:
+https://travis-ci.org/github/lhmcgann/MyDiaryApp
+
+
