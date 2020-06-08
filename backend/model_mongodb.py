@@ -75,11 +75,13 @@ class Entry(Model):
         else:
             return None
 
+    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, entry):
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
         return entry
 
+    # convert any ObjectIds to strings
     def make_printable(self, entry):
         if '_id' in entry:
             entry["_id"] = str(entry["_id"])
@@ -103,6 +105,8 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
+    # return the full, printable Diary object, if there is one for this Entry,
+    #   else return None
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
@@ -195,11 +199,13 @@ class Tag(Model):
                 return count
         return None
 
+    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, tag):
         if 'd_id' in tag:
             tag["d_id"] = ObjectId(tag["d_id"])
         return tag
 
+    # convert any ObjectIds to strings
     def make_printable(self, tag):
         if '_id' in tag:
             tag["_id"] = str(tag["_id"])
@@ -207,6 +213,8 @@ class Tag(Model):
             tag["d_id"] = str(tag["d_id"])
         return tag
 
+    # return the full, printable Diary object, if there is one for this Tag,
+    #   else return None
     def get_diary(self, diary):
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
@@ -243,6 +251,7 @@ class Diary(Model):
                 entry.remove()
         return super(Diary, self).remove()
 
+    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, diary):
         if "entries" in diary:
             entries = diary["entries"]
@@ -250,6 +259,7 @@ class Diary(Model):
                 entries[i] = ObjectId(entries[i])
         return diary
 
+    # convert any ObjectIds to strings
     def make_printable(self, diary):
         if '_id' in diary:
             diary["_id"] = str(diary["_id"])
@@ -259,18 +269,21 @@ class Diary(Model):
                 entries[i] = str(entries[i])
         return diary
 
+    # return a list of all diaries in the db as printable Diary objects
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
             diary = self.make_printable(diary)
         return diaries
 
+    # return a list of printable Diary objects that match the given title
     def find_by_title(self, title):
         diaries = list(self.collection.find({"title": title}))
         for diary in diaries:  # change all ObjectIDs to strs
             diary = self.make_printable(diary)
         return diaries
 
+    # return a list of this Diary's entries as full, printable Entry objects
     def get_entries(self):
         items = []
         if self.reload():
@@ -278,12 +291,16 @@ class Diary(Model):
             items = Entry.make_entries_printable(items)
         return items
 
+    # return a list of this Diary's tags as full, printable Tag objects
     def get_tags(self):
         items = []
         if self._id:
             items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
         return items
 
+    # return a list of this Diary's entries as full, printable Entry objects
+    #   sorted by dateCreated. recent_first=True (default) if want to sort by
+    #   most recent first. recent_first=False to sort by most recent last.
     def sort_entries_by_date_created(self, recent_first=True):
         sort = []
         if self.reload():
@@ -296,6 +313,8 @@ class Diary(Model):
                           reverse=recent_first)
         return sort
 
+    # return a list of this Diary's entries as full, printable Entry objects
+    #   that conatain (in their title or text body) the text to search for
     def search_entries_for_text(self, string):
         res = []
         if self.reload():
