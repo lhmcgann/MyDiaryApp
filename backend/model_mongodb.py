@@ -3,7 +3,6 @@ import ssl
 from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime
-import time
 
 URI = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
 
@@ -88,25 +87,6 @@ class Entry(Model):
             entry["d_id"] = str(entry["d_id"])
         return entry
 
-    def get_diary(self):
-        if self.d_id:           # if diary id (so diary should exist)
-            diary = Diary({"_id": self.d_id})
-            res = diary.reload()
-            return (diary if res else None)
-        return None
-
-    @staticmethod
-    def filter_with_tags(entries, tags):
-        def entry_has_tag(entry):
-            entry_tags = set(entry["tags"])
-            for tag in tags:
-                if tag not in entry_tags:
-                    return False
-            return True
-
-        filtered_entries = list(filter(entry_has_tag, entries))
-        return filtered_entries
-
     @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
@@ -122,6 +102,16 @@ class Entry(Model):
                 if self._id == str(id):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
+
+    def get_diary(self):
+        if self.d_id:           # if diary id (so diary should exist)
+            diary = Diary({"_id": self.d_id})
+            res = diary.reload()
+            return (diary if res else None)
+        return None
+
+        filtered_entries = list(filter(entry_has_tag, entries))
+        return filtered_entries
 
     def has_tag(self, title):
         if self.reload():
@@ -149,6 +139,15 @@ class Entry(Model):
                 return True
         return False
 
+    @staticmethod
+    def filter_with_tags(entries, tags):
+        def entry_has_tag(entry):
+            entry_tags = set(entry["tags"])
+            for tag in tags:
+                if tag not in entry_tags:
+                    return False
+            return True
+
 
 class Tag(Model):
     cluster = pymongo.MongoClient(URI)
@@ -166,13 +165,6 @@ class Tag(Model):
                 if tag:
                     self['_id'] = tag['_id']
                 super(Tag, self).save()
-
-    def get_diary(self, diary):
-        if self.d_id:           # if diary id (so diary should exist)
-            diary = Diary({"_id": self.d_id})
-            res = diary.reload()
-            return (diary if res else None)
-        return None
 
     def reload(self):
         if self._id:
@@ -203,15 +195,6 @@ class Tag(Model):
                 return count
         return None
 
-    # shouldn't be tags with same title in same diary --> can use title to get
-    def find_by_title(self, title, d_id):
-        tags = list(self.collection.find({"title": title,
-                                          'd_id': ObjectId(d_id)}))
-        if len(tags) > 0:
-            tag = self.make_printable(Tag(tags[0]))
-            return tag
-        return None
-
     def make_db_ready(self, tag):
         if 'd_id' in tag:
             tag["d_id"] = ObjectId(tag["d_id"])
@@ -223,6 +206,22 @@ class Tag(Model):
         if 'd_id' in tag:
             tag["d_id"] = str(tag["d_id"])
         return tag
+
+    def get_diary(self, diary):
+        if self.d_id:           # if diary id (so diary should exist)
+            diary = Diary({"_id": self.d_id})
+            res = diary.reload()
+            return (diary if res else None)
+        return None
+
+    # shouldn't be tags with same title in same diary --> can use title to get
+    def find_by_title(self, title, d_id):
+        tags = list(self.collection.find({"title": title,
+                                          'd_id': ObjectId(d_id)}))
+        if len(tags) > 0:
+            tag = self.make_printable(Tag(tags[0]))
+            return tag
+        return None
 
 
 class Diary(Model):
@@ -243,6 +242,22 @@ class Diary(Model):
                 entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
                 entry.remove()
         return super(Diary, self).remove()
+
+    def make_db_ready(self, diary):
+        if "entries" in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = ObjectId(entries[i])
+        return diary
+
+    def make_printable(self, diary):
+        if '_id' in diary:
+            diary["_id"] = str(diary["_id"])
+        if 'entries' in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = str(entries[i])
+        return diary
 
     def find_all(self):
         diaries = list(self.collection.find())
@@ -268,22 +283,6 @@ class Diary(Model):
         if self._id:
             items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
         return items
-
-    def make_db_ready(self, diary):
-        if "entries" in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = ObjectId(entries[i])
-        return diary
-
-    def make_printable(self, diary):
-        if '_id' in diary:
-            diary["_id"] = str(diary["_id"])
-        if 'entries' in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = str(entries[i])
-        return diary
 
     def sort_entries_by_date_created(self, recent_first=True):
         sort = []
