@@ -123,7 +123,7 @@ def test_diary_remove():
     assert (diary == {}) is True
 
 
-def test_diary_remove_with_entries():
+def test_diary_remove_with_entries_tags():
     title = 'test_diary_remove_with_entries'
     diary = Diary({'title': title, 'entries': []})
     diary.save()
@@ -134,10 +134,23 @@ def test_diary_remove_with_entries():
     e1.save()
     e2 = Entry({'title': 'del diary 2', 'd_id': did, 'tags': []})
     e2.save()
+    t = Tag({'title': 'hi', 'd_id': did})
+    t.save()
 
     diary.remove()
     assert diary.reload() is False
     assert Diary.collection.find_one({"title": title}) is None
+
+
+def test_find_all_diaries():
+    diaries = Diary().find_all()
+    assert len(diaries) == 3
+
+
+def test_find_by_title_diaries():
+    diaries = Diary().find_by_title("Test 1")
+    assert len(diaries) == 1
+    assert diaries[0]['title'] == "Test 1"
 
 
 def test_diary_get_entries():
@@ -159,6 +172,10 @@ def test_diary_get_entries():
     assert entries == docs
 
     diary.remove()
+
+
+def test_tag_get_diary():
+    assert Tag().get_diary(Diary()) is None
 
 
 def test_entry_get_diary_no_id():
@@ -629,11 +646,37 @@ def test_remove_tag():
     assert entry.remove() is not None  # cleanup for testing
 
 
-def test_has_tag():
+def test_has_tag_no_id():
+    assert Entry().has_tag('valid tag') is None
+
+
+def test_has_tag_false():
     entry = Entry({'title': 'test_has_tag', 'd_id': D_ID, 'tags': []})
     entry.save()
     assert entry.has_tag('valid tag') is False
     entry.remove()
+
+
+def test_filter_tags():
+    e1 = Entry({'title': 'e1', 'd_id': D_ID, 'tags': [], 'textBody': "na"})
+    e1.save()
+    e1.reload()
+    e2 = Entry({'title': 'e2', 'd_id': D_ID, 'tags': [], 'textBody': "na2"})
+    e2.save()
+    e2.reload()
+
+    e1.add_tag('t1')
+    e1.reload()
+    entries = [e1, e2]
+    res = Entry.filter_with_tags(entries, ['t1'])
+    assert len(res) == 1
+    assert res[0] == e1
+
+    t1 = Tag({'title': 't1', 'd_id': D_ID})
+    t1.reload()
+    t1.remove()
+    e1.remove()
+    e2.remove()
 
 
 def test_sort_entries_no_id():
@@ -700,74 +743,6 @@ def test_text_search_entries_found():
     assert (entries[1] == e1 or entries[1] == e2) is True
 
 
-# def test_find_by_al1_tag_no_id():
-#     assert Diary().find_by_at_least_one_tag(["tag 1"]) == []
-#
-#
-# def test_find_by_al1_tag_bad_id():
-#     assert Diary({'_id': ObjectId()}).find_by_at_least_one_tag(["tag 1"]) == []
-#
-#
-# def test_find_by_al1_tag_empty_diary():
-#     assert Diary({'_id': D_ID}).find_by_at_least_one_tag(["tag 1"]) == []
-#
-#
-# def test_find_by_al1_tag_bad_tag():
-#     tags = ["dkghdghkf"]
-#     assert Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags) == []
-#
-#
-# def test_find_by_al1_tag_none_found():
-#     tags = ["tag 1", "tag 2"]
-#     assert Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags) == []
-#
-#
-# # Sort 1: a, d
-# # Sort 2: a
-# # Sort 3: b, c
-# # Sort 4: d
-# def test_find_by_al1_tag_one_found_with_one():
-#     tags = ["c"]
-#     entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
-#     assert len(entries) == 1
-#     e1 = Entry(list(Entry.collection.find({'title': "Sort Test 3"}))[0])
-#     e1 = e1.make_printable(e1)
-#     assert entries[0] == e1
-
-
-# def test_find_by_al1_tag_one_found_with_mult():
-#     tags = ["c", "b"]
-#     entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
-#     assert len(entries) == 1
-#     e1 = Entry(list(Entry.collection.find({'title': "Sort Test 3"}))[0])
-#     e1 = e1.make_printable(e1)
-#     assert entries[0] == e1
-#
-#
-# def test_find_by_al1_tag_mult_found_with_one():
-#     tags = ["a"]
-#     entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
-#     assert len(entries) == 2
-#     e1 = Entry(list(Entry.collection.find({'title': "Sort Test 1"}))[0])
-#     e1 = e1.make_printable(e1)
-#     e2 = Entry(list(Entry.collection.find({'title': "Sort Test 2"}))[0])
-#     e2 = e2.make_printable(e2)
-#     assert (entries[0] == e1 or entries[0] == e2) is True
-#     assert (entries[1] == e1 or entries[1] == e2) is True
-#
-#
-# def test_find_by_al1_tag_mult_found_with_mult():
-#     tags = ["d", "a"]
-#     entries = Diary({'_id': SORT_D_ID}).find_by_at_least_one_tag(tags)
-#     assert len(entries) == 2
-#     e1 = Entry(list(Entry.collection.find({'title': "Sort Test 1"}))[0])
-#     e1 = e1.make_printable(e1)
-#     e2 = Entry(list(Entry.collection.find({'title': "Sort Test 4"}))[0])
-#     e2 = e2.make_printable(e2)
-#     assert (entries[0] == e1 or entries[0] == e2) is True
-#     assert (entries[1] == e1 or entries[1] == e2) is True
-
-
 def test_end():
     diary = Diary.collection.find_one({"_id": ObjectId(D_ID)})
     assert diary is not None
@@ -782,9 +757,3 @@ def test_end():
     Diary.collection = Diary.db["diaries"]
     Tag.db = Tag.cluster[Tag.dbStr]
     Tag.collection = Tag.db["tags"]
-
-
-# def test_find_all_diaries():
-#     num_diaries = len(d_collection.find())
-#     diaries = Diary().find_all()
-#     assert num_diaries == len(diaries)
