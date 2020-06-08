@@ -155,6 +155,8 @@ def test_diary_get_entries():
     e2 = Entry(doc2)
     e2.save()
 
+    diary.remove()
+
 
 def test_entry_get_diary_no_id():
     entry = Entry()
