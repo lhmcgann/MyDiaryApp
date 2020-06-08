@@ -9,7 +9,7 @@ const EntryListBody = (props) => {
         `${window.location.pathname}/entries/${row._id}`}>
       {row.title}
       </Link>
-      <button onClick={() => props.removeCharacter(index)}>Delete</button>
+      <button onClick={() => props.removeEntry(index)}>Delete</button>
       </div>
     );
   });
@@ -17,10 +17,10 @@ const EntryListBody = (props) => {
   return <tbody>{rows}</tbody>;
 };
 const EntryList = (props) => {
-  const { entryData, removeCharacter } = props;
+  const { entryData, removeEntry } = props;
   return (
     <table>
-      <EntryListBody entryData={entryData} removeCharacter={removeCharacter}/>
+      <EntryListBody entryData={entryData} removeEntry={removeEntry}/>
     </table>
   );
 };

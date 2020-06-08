@@ -23,7 +23,7 @@ class EntryButton extends Component {
 
     return (
       <form>
-        <div class="entry-grid">
+        <div className="entry-grid">
           <label htmlFor="title">Title</label>
           <input
             size="10"
