@@ -69,7 +69,7 @@ class Entry(Model):
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
-            diary["entries"].remove(ObjectId(self._id))
+            diary["entries"].remove(self._id)
             diary.save()
             return super(Entry, self).remove()  # remove from entries collection
         else:
@@ -86,13 +86,6 @@ class Entry(Model):
         if 'd_id' in entry:
             entry["d_id"] = str(entry["d_id"])
         return entry
-
-    # TODO: test
-    @staticmethod
-    def get_entries_with_diary_id(diaryId):
-        items = list(Entry.collection.find({"d_id": ObjectId(diaryId)}))
-        items = Entry.make_entries_printable(items)
-        return items
 
     def get_diary(self):
         if self.d_id:           # if diary id (so diary should exist)
