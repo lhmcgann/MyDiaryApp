@@ -5,7 +5,8 @@ from bson import ObjectId
 from datetime import datetime
 import time
 
-uri = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/test?w=majority'
+URI = 'mongodb+srv://client:mydiaryapp@cluster0-k792t.azure.mongodb.net/\
+        test?w=majority'
 
 
 class Model(dict):
@@ -48,7 +49,8 @@ class Model(dict):
 
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
-    cluster = pymongo.MongoClient(uri, ssl=True, tlsAllowInvalidCertificates=False)
+    cluster = pymongo.MongoClient(URI, ssl=True,
+                                  tlsAllowInvalidCertificates=False)
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["entries"]
@@ -150,7 +152,7 @@ class Entry(Model):
 
 
 class Tag(Model):
-    cluster = pymongo.MongoClient(uri)
+    cluster = pymongo.MongoClient(URI)
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["tags"]
@@ -204,7 +206,8 @@ class Tag(Model):
 
     # shouldn't be tags with same title in same diary --> can use title to get
     def find_by_title(self, title, d_id):
-        tags = list(self.collection.find({"title": title, 'd_id': ObjectId(d_id)}))
+        tags = list(self.collection.find({"title": title,
+                                          'd_id': ObjectId(d_id)}))
         if len(tags) > 0:
             tag = self.make_printable(Tag(tags[0]))
             return tag
@@ -224,7 +227,7 @@ class Tag(Model):
 
 
 class Diary(Model):
-    cluster = pymongo.MongoClient(uri)
+    cluster = pymongo.MongoClient(URI)
     dbStr = "myDiaryApp"
     db = cluster[dbStr]
     collection = db["diaries"]
@@ -261,37 +264,11 @@ class Diary(Model):
             items = Entry.make_entries_printable(items)
         return items
 
-    # TODO: test
     def get_tags(self):
         items = []
         if self._id:
             items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
         return items
-
-    # def translate_to_tag_ids(self, tag_names):
-    #     res = []
-    #     if self._id:
-    #         for title in tag_names:
-    #             tag = Tag({'title': title, 'd_id': self._id})
-    #             print("RELOAD: " + str(tag.reload()))
-    #             print("TAG: " + str(tag))
-    #             res.append(tag['_id'])
-    #     return res
-    #
-    # # tags is a string array of tag titles
-    # def find_by_at_least_one_tag(self, tag_names):
-    #     res = []
-    #     if self.reload():
-    #         tag_ids = self.translate_to_tag_ids(tag_names)
-    #         for entry_id in self['entries']:
-    #             entry = Entry({'_id': entry_id})
-    #             entry.reload()
-    #             # tag for tag in tag_ids if tag in entry['tags']
-    #             for tag in tag_ids:
-    #                 if tag in entry["tags"]:
-    #                     entry = entry.make_printable(entry)
-    #                     res.append(entry)
-    #     return res
 
     def make_db_ready(self, diary):
         if "entries" in diary:
