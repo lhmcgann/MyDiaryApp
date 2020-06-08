@@ -62,6 +62,129 @@ class Model(dict):
         return None
 
 
+class Diary(Model):
+    """
+    A Diary document.
+
+    Fields
+    - _id: unique to this document; automatically generated on creation
+    - title: the string title
+    - dateCreated: the datetime this Tag was created; automatically generated
+        on creation
+    - entries: a list of the ObjectIds of all Entries in this Diary
+    """
+    cluster = pymongo.MongoClient(URI)
+    dbStr = "myDiaryApp"
+    db = cluster[dbStr]
+    collection = db["diaries"]
+
+    def remove(self):
+        """
+        Remove this Diary and all of its Entries and Tags from the db.
+        """
+        if self.reload():
+            for tag in self.get_tags():
+                t = Tag(tag)
+                t['_id'] = str(t['_id'])
+                t.remove()
+            for entry_id in self['entries']:
+                # should already be strs but just in case
+                entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
+                entry.remove()
+        return super(Diary, self).remove()
+
+    def make_db_ready(self, diary):
+        """ Convert any string _ids to ObjectIds for storage in the db """
+        if "entries" in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = ObjectId(entries[i])
+        return diary
+
+    def make_printable(self, diary):
+        """ Convert any ObjectIds to strings """
+        if '_id' in diary:
+            diary["_id"] = str(diary["_id"])
+        if 'entries' in diary:
+            entries = diary["entries"]
+            for i in range(len(entries)):
+                entries[i] = str(entries[i])
+        return diary
+
+    def find_all(self):
+        """
+        Return a list of all Diaries in the db as printable Diary objects.
+        """
+        diaries = list(self.collection.find())
+        for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
+            diary = self.make_printable(diary)
+        return diaries
+
+    def find_by_title(self, title):
+        """
+        Return a list of printable Diary objects that match the given title.
+        """
+        diaries = list(self.collection.find({"title": title}))
+        for diary in diaries:  # change all ObjectIDs to strs
+            diary = self.make_printable(diary)
+        return diaries
+
+    def get_entries(self):
+        """
+        Return a list of this Diary's Entries as full, printable Entry objects.
+        """
+        items = []
+        if self.reload():
+            items = list(Entry.collection.find({"d_id": ObjectId(self._id)}))
+            items = Entry.make_entries_printable(items)
+        return items
+
+    def get_tags(self):
+        """
+        Return a list of this Diary's tags as full, printable Tag objects.
+        """
+        items = []
+        if self._id:
+            items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
+        return items
+
+    def sort_entries_by_date_created(self, recent_first=True):
+        """
+        Sort this Diary's entries by date created.
+
+        recent_first=True (default) to sort by most recent first.
+        recent_first=False to sort by most recent last.
+        Return a list of the sorted Entries as full, printable Entry objects.
+        """
+        sort = []
+        if self.reload():
+            for entry_id in self['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                entry = entry.make_printable(entry)
+                sort.append(entry)
+            sort = sorted(sort, key=lambda r: r["dateCreated"],
+                          reverse=recent_first)
+        return sort
+
+    def search_entries_for_text(self, string):
+        """
+        Search this Diary's Entries for a text string.
+
+        Return a list of Entries (as full, printable Entry objects) that contain
+        (in their title or text body) the text string to search for.
+        """
+        res = []
+        if self.reload():
+            for entry_id in self['entries']:
+                entry = Entry({'_id': entry_id})
+                entry.reload()
+                if string in entry['title'] or string in entry['textBody']:
+                    entry = entry.make_printable(entry)
+                    res.append(entry)
+        return res
+
+
 # if need specific Entry, should init w/ d_id (diary id) and _id (entry id)
 class Entry(Model):
     """
@@ -331,126 +454,3 @@ class Tag(Model):
             tag = self.make_printable(Tag(tags[0]))
             return tag
         return None
-
-
-class Diary(Model):
-    """
-    A Diary document.
-
-    Fields
-    - _id: unique to this document; automatically generated on creation
-    - title: the string title
-    - dateCreated: the datetime this Tag was created; automatically generated
-        on creation
-    - entries: a list of the ObjectIds of all Entries in this Diary
-    """
-    cluster = pymongo.MongoClient(URI)
-    dbStr = "myDiaryApp"
-    db = cluster[dbStr]
-    collection = db["diaries"]
-
-    def remove(self):
-        """
-        Remove this Diary and all of its Entries and Tags from the db.
-        """
-        if self.reload():
-            for tag in self.get_tags():
-                t = Tag(tag)
-                t['_id'] = str(t['_id'])
-                t.remove()
-            for entry_id in self['entries']:
-                # should already be strs but just in case
-                entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
-                entry.remove()
-        return super(Diary, self).remove()
-
-    def make_db_ready(self, diary):
-        """ Convert any string _ids to ObjectIds for storage in the db """
-        if "entries" in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = ObjectId(entries[i])
-        return diary
-
-    def make_printable(self, diary):
-        """ Convert any ObjectIds to strings """
-        if '_id' in diary:
-            diary["_id"] = str(diary["_id"])
-        if 'entries' in diary:
-            entries = diary["entries"]
-            for i in range(len(entries)):
-                entries[i] = str(entries[i])
-        return diary
-
-    def find_all(self):
-        """
-        Return a list of all Diaries in the db as printable Diary objects.
-        """
-        diaries = list(self.collection.find())
-        for diary in diaries:  # change ObjectIDs->strs so is JSON serializable
-            diary = self.make_printable(diary)
-        return diaries
-
-    def find_by_title(self, title):
-        """
-        Return a list of printable Diary objects that match the given title.
-        """
-        diaries = list(self.collection.find({"title": title}))
-        for diary in diaries:  # change all ObjectIDs to strs
-            diary = self.make_printable(diary)
-        return diaries
-
-    def get_entries(self):
-        """
-        Return a list of this Diary's Entries as full, printable Entry objects.
-        """
-        items = []
-        if self.reload():
-            items = list(Entry.collection.find({"d_id": ObjectId(self._id)}))
-            items = Entry.make_entries_printable(items)
-        return items
-
-    def get_tags(self):
-        """
-        Return a list of this Diary's tags as full, printable Tag objects.
-        """
-        items = []
-        if self._id:
-            items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
-        return items
-
-    def sort_entries_by_date_created(self, recent_first=True):
-        """
-        Sort this Diary's entries by date created.
-
-        recent_first=True (default) to sort by most recent first.
-        recent_first=False to sort by most recent last.
-        Return a list of the sorted Entries as full, printable Entry objects.
-        """
-        sort = []
-        if self.reload():
-            for entry_id in self['entries']:
-                entry = Entry({'_id': entry_id})
-                entry.reload()
-                entry = entry.make_printable(entry)
-                sort.append(entry)
-            sort = sorted(sort, key=lambda r: r["dateCreated"],
-                          reverse=recent_first)
-        return sort
-
-    def search_entries_for_text(self, string):
-        """
-        Search this Diary's Entries for a text string.
-
-        Return a list of Entries (as full, printable Entry objects) that contain
-        (in their title or text body) the text string to search for.
-        """
-        res = []
-        if self.reload():
-            for entry_id in self['entries']:
-                entry = Entry({'_id': entry_id})
-                entry.reload()
-                if string in entry['title'] or string in entry['textBody']:
-                    entry = entry.make_printable(entry)
-                    res.append(entry)
-        return res
