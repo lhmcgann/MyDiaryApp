@@ -140,7 +140,6 @@ def test_diary_remove_with_entries():
     assert Diary.collection.find_one({"title": title}) is None
 
 
-# TODO
 def test_diary_get_entries():
     title = 'test_diary_get_entries'
     diary = Diary({'title': title, 'entries': []})
@@ -148,12 +147,16 @@ def test_diary_get_entries():
     assert diary.reload() is True
     did = diary['_id']
 
-    doc1 = {'title': 'get entries 1', 'd_id': did, 'tags': []}
-    e1 = Entry(doc1)
+    e1 = Entry({'title': 'get entries 1', 'd_id': did, 'tags': []})
     e1.save()
-    doc2 = {'title': 'get entries 2', 'd_id': did, 'tags': []}
-    e2 = Entry(doc2)
+    e1.reload()
+    e2 = Entry({'title': 'get entries 2', 'd_id': did, 'tags': []})
     e2.save()
+    e2.reload()
+    docs = [e1, e2]
+
+    entries = diary.get_entries()
+    assert entries == docs
 
     diary.remove()
 
@@ -439,14 +442,16 @@ def test_add_tag_new():
     entry.reload()
     assert isinstance(entry["_id"], str)
     assert len(entry["tags"]) == 1
-    for tag in entry["tags"]:
-        assert isinstance(tag, str)
+    assert 'valid tag' in entry['tags']
+    # for tag in entry["tags"]:
+    #     assert isinstance(tag, str)
 
     tag_name = "new tag"
     entry.add_tag(tag_name)
     assert len(entry["tags"]) == 2
-    for tag in entry["tags"]:
-        assert isinstance(tag, str)
+    assert 'new tag' in entry['tags']
+    # for tag in entry["tags"]:
+    #     assert isinstance(tag, str)
     tag = Tag().find_by_title(tag_name, entry.d_id)
     assert tag is not None
     assert "d_id" in tag
@@ -622,6 +627,13 @@ def test_remove_tag():
     assert Tag().find_by_title(tag_name, entry.d_id) is None
 
     assert entry.remove() is not None  # cleanup for testing
+
+
+def test_has_tag():
+    entry = Entry({'title': 'test_has_tag', 'd_id': D_ID, 'tags': []})
+    entry.save()
+    assert entry.has_tag('valid tag') is False
+    entry.remove()
 
 
 def test_sort_entries_no_id():
