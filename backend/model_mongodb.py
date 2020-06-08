@@ -107,7 +107,6 @@ class Entry(Model):
         filtered_entries = list(filter(entry_has_tag, entries))
         return filtered_entries
 
-    # TODO: test
     @staticmethod
     def make_entries_printable(entries):
         for entry in entries:
@@ -124,7 +123,6 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
-    # TODO: test
     def has_tag(self, title):
         if self.reload():
             return title in self['tags']
@@ -232,7 +230,6 @@ class Diary(Model):
     db = cluster[dbStr]
     collection = db["diaries"]
 
-    # TODO: test
     # if del diary, make sure to del all entries!
     def remove(self):
         if self.reload():
@@ -246,7 +243,6 @@ class Diary(Model):
                 entry.remove()
         return super(Diary, self).remove()
 
-    # TODO: test
     def find_all(self):
         diaries = list(self.collection.find())
         for diary in diaries:  # change ObjectIDs->strs so is JSON serializable

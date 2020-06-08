@@ -123,7 +123,7 @@ def test_diary_remove():
     assert (diary == {}) is True
 
 
-def test_diary_remove_with_entries():
+def test_diary_remove_with_entries_tags():
     title = 'test_diary_remove_with_entries'
     diary = Diary({'title': title, 'entries': []})
     diary.save()
@@ -134,10 +134,17 @@ def test_diary_remove_with_entries():
     e1.save()
     e2 = Entry({'title': 'del diary 2', 'd_id': did, 'tags': []})
     e2.save()
+    t = Tag({'title': 'hi', 'd_id': did})
+    t.save()
 
     diary.remove()
     assert diary.reload() is False
     assert Diary.collection.find_one({"title": title}) is None
+
+
+def test_find_all_diaries():
+    diaries = Diary().find_all()
+    assert len(diaries) == 3
 
 
 def test_diary_get_entries():
@@ -629,7 +636,11 @@ def test_remove_tag():
     assert entry.remove() is not None  # cleanup for testing
 
 
-def test_has_tag():
+def test_has_tag_no_id():
+    assert Entry().has_tag('valid tag') is None
+
+
+def test_has_tag_false():
     entry = Entry({'title': 'test_has_tag', 'd_id': D_ID, 'tags': []})
     entry.save()
     assert entry.has_tag('valid tag') is False
