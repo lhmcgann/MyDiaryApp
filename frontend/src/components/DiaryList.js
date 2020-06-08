@@ -18,8 +18,6 @@ const DiaryListBody = (props) => {
 };
 const DiaryList = (props) => {
   const { diaryData, removeDiary } = props;
-  return (
-      <DiaryListBody diaryData={diaryData} removeDiary={removeDiary} />
-  );
+  return <DiaryListBody diaryData={diaryData} removeDiary={removeDiary} />;
 };
 export default DiaryList;
