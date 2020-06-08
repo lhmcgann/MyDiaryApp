@@ -15,9 +15,13 @@ class Model(dict):
     __delattr__ = dict.__delitem__
     __setattr__ = dict.__setitem__
 
-    # Saves this object to the db. If new object (i.e. no _id), inserts new and
-    #   generates a dateCreated, else updates the existing db object.
     def save(self):
+        """
+        Saves this object to the db.
+
+        If new object (i.e. no _id), inserts new and generates a dateCreated,
+        else updates the existing db object.
+        """
         if not self._id:
             self = self.make_db_ready(self)
             self['dateCreated'] = datetime.utcnow()
@@ -30,9 +34,12 @@ class Model(dict):
             self["_id"] = id
         self = self.make_printable(self)
 
-    # Fills this Model with the rest of its information from the db and makes
-    #   this Model printable. Returns True on success, False on failure.
     def reload(self):
+        """
+        Fills this Model with the rest of its information from the db.
+
+        Makes this Model printable. Returns True on success, False on failure.
+        """
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
@@ -41,10 +48,13 @@ class Model(dict):
                 return True
         return False
 
-    # Removes this Model object from the database and clears this object.
-    #   Returns the db response on success, None if failed (no _id in this
-    #   object)
     def remove(self):
+        """
+        Removes this Model object from the database and clears this object.
+
+        Returns the db response on success, None if failed (no _id in this
+        object)
+        """
         if self._id:
             resp = self.collection.delete_one({"_id": ObjectId(self._id)})
             self.clear()
@@ -60,8 +70,13 @@ class Entry(Model):
     db = cluster[dbStr]
     collection = db["entries"]
 
-    # return: None if failed, True if inserted new, False if updated existing
     def save(self):
+        """
+        Save this diary to the db.
+
+        Insert if new, else update existing.
+        return: None if failed, True if inserted new, False if updated existing
+        """
         diary = self.get_diary()                 # the filled Diary obj
         if not diary:
             return None
@@ -73,8 +88,10 @@ class Entry(Model):
             return True
         return False
 
-    # remove this Entry from the db and remove its id from the Diary it was in
     def remove(self):
+        """
+        Remove this Entry from the db and remove its id from the Diary it was in
+        """
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
             diary["entries"].remove(self._id)
@@ -83,57 +100,70 @@ class Entry(Model):
         else:
             return None
 
-    # convert any string _ids to ObjectIds for storage in the db
     def make_db_ready(self, entry):
+        """ Convert any string _ids to ObjectIds for storage in the db """
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
         return entry
 
-    # convert any ObjectIds to strings
     def make_printable(self, entry):
+        """ Convert any ObjectIds to strings """
         if '_id' in entry:
             entry["_id"] = str(entry["_id"])
         if 'd_id' in entry:
             entry["d_id"] = str(entry["d_id"])
         return entry
 
-    # return the given list of Entry objects as a list printable objects
     @staticmethod
     def make_entries_printable(entries):
+        """ Get the given list of Entry objects as a list printable objects """
         for entry in entries:
             entry = Entry(entry).make_printable(entry)
         return entries
 
-    # for internal use mostly (see above save)
-    # This entry's _id doesn't need to be a valid entry. This function only
-    #   checks if the specified _id is in the given diary JSON object.
     def find_entry_in_diary(self, diary):
+        """
+        Check if this Entry's _id is in the given Diary object.
+
+        For internal use mostly. Returns the result of the db query, None if
+        fails.
+        """
         if diary and self._id:
             for id in diary["entries"]:  # entries = [ObjectIds]
                 if self._id == str(id):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
-    # return the full, printable Diary object, if there is one for this Entry,
-    #   else return None
     def get_diary(self):
+        """
+        Get the Diary object of the Diary this Entry is in.
+
+        Returns the full, printable Diary object if there is one, else None.
+        """
         if self.d_id:           # if diary id (so diary should exist)
             diary = Diary({"_id": self.d_id})
             res = diary.reload()
             return (diary if res else None)
         return None
 
-    # return True is this Entry has the Tag with the given title, False if not
-    #   return None reload error
     def has_tag(self, title):
+        """
+        Checks the Tag with the given title is in this Entry.
+
+        Return True if yes, False if not, None if Entry reload error.
+        """
         if self.reload():
             return title in self['tags']
         return None
 
-    # title is the unique tag title. If new tag, create tag first
-    #   If a tag with the given title is already in this Entry, a duplicate
-    #   will not be added.
     def add_tag(self, title):
+        """
+        Add a Tag with the given title to this Entry.
+
+        If a Tag with the given title is already in this Entry, a duplicate
+        will not be added. If the Tag does not exist in the Diary, a new Tag
+        will be added to the db. Returns True if successful, False if not.
+        """
         if self._id and self.reload() and not self.has_tag(title):
             tag = Tag().find_by_title(title, self.d_id)
             # if new tag, create in db
@@ -144,9 +174,12 @@ class Entry(Model):
             return True
         return False
 
-    # Delete the Tag with the given title from this entry. returns True if
-    #   successful, False if not.
     def delete_tag(self, title):
+        """
+        Delete the Tag with the given title from this Entry.
+
+        Returns True if successful, False if not.
+        """
         if self._id and self.reload():
             tag = Tag().find_by_title(title, self.d_id)
             if tag is not None:
@@ -155,10 +188,14 @@ class Entry(Model):
                 return True
         return False
 
-    # return a list of Entries in entries that contain all tags in the given
-    #   list of Tag titles
     @staticmethod
     def filter_with_tags(entries, tags):
+        """
+        Return a list of Entries in entries that match all tags in tags.
+
+        Entries shold be a list of full Entry objects.
+        Tags is a list of tag names to filter by.
+        """
         def entry_has_tag(entry):
             entry_tags = set(entry["tags"])
             for tag in tags:
