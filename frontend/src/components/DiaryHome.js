@@ -71,38 +71,23 @@ class DiaryHome extends Component {
       }
     });
   };
-  sortMostRecent() {
+  sortRecency(recency) {
     axios
       .get(
         "http://localhost:5000/diaries/" +
           this.props.match.params.d_id +
           "/entries",
-        { params: { sortBy: "mostRecent" } }
+        { params: { sortBy: recency } }
       )
       .then((res) => {
         const entries = res.data; //.diaries;
         this.setState({ entries: entries });
+        return true;
       })
       .catch(function (error) {
         //Not handling the error. Just logging into the console.
         console.log(error);
-      });
-  }
-  sortLeastRecent() {
-    axios
-      .get(
-        "http://localhost:5000/diaries/" +
-          this.props.match.params.d_id +
-          "/entries",
-        { params: { sortBy: "leastRecent" } }
-      )
-      .then((res) => {
-        const entries = res.data; //.diaries;
-        this.setState({ entries: entries });
-      })
-      .catch(function (error) {
-        //Not handling the error. Just logging into the console.
-        console.log(error);
+        return true;
       });
   }
   render() {
@@ -113,8 +98,16 @@ class DiaryHome extends Component {
         <div className="dropdown">
           <button className="dropbtn">Dropdown</button>
           <div className="dropdown-content">
-            <button>Sort by Most Recent</button>
-            <button>Sort by Least Recent</button>
+            <div>
+              <button onClick={() => this.sortRecency("mostRecent")}>
+                Most Recent
+              </button>
+            </div>
+            <div>
+              <button onClick={() => this.sortRecency("leastRecent")}>
+                Least Recent
+              </button>
+            </div>
           </div>
         </div>
         <h1>{title}</h1>

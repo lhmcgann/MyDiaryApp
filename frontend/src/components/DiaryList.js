@@ -16,7 +16,7 @@ const DiaryListBody = (props) => {
   return <tbody>{rows}</tbody>;
 };
 const DiaryList = (props) => {
-  const { diaryData, removeDiary} = props;
+  const { diaryData, removeDiary } = props;
   return (
     <table>
       <DiaryListBody diaryData={diaryData} removeDiary={removeDiary} />

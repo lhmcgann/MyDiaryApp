@@ -5,11 +5,13 @@ const EntryListBody = (props) => {
   const rows = props.entryData.map((row, index) => {
     return (
       <div>
-      <Link className="entry-block" to={
-        `${window.location.pathname}/entries/${row._id}`}>
-      {row.title}
-      </Link>
-      <button onClick={() => props.removeEntry(index)}>Delete</button>
+        <Link
+          className="entry-block"
+          to={`${window.location.pathname}/entries/${row._id}`}
+        >
+          {row.title}
+        </Link>
+        <button onClick={() => props.removeEntry(index)}>Delete</button>
       </div>
     );
   });
@@ -20,7 +22,7 @@ const EntryList = (props) => {
   const { entryData, removeEntry } = props;
   return (
     <table>
-      <EntryListBody entryData={entryData} removeEntry={removeEntry}/>
+      <EntryListBody entryData={entryData} removeEntry={removeEntry} />
     </table>
   );
 };

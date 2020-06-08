@@ -1,19 +1,19 @@
-.centered{
+.centered {
   text-align: center;
 }
-.entry-grid{
+.entry-grid {
   width: 50%;
   margin-left: 25%;
   height: 50%;
   text-align: center;
 }
-.diary-block{
+.diary-block {
   width: 30%;
 
   height: 100%;
   font-size: 1.5rem;
 }
-.entry-block{
+.entry-block {
   color: white;
   background-color: gray;
   width: 20%;
@@ -26,16 +26,15 @@
   display: inline-block;
   text-decoration: none;
 }
-.entry-block:hover{
+.entry-block:hover {
   background-color: green;
   color: white;
 }
-.entry-block:link{
+.entry-block:link {
   text-decoration: none;
-
 }
 .dropbtn {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 16px;
   font-size: 16px;
@@ -53,7 +52,7 @@
   position: absolute;
   background-color: #f9f9f9;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   z-index: 1;
 }
 
@@ -64,7 +63,9 @@
   display: block;
 }
 
-.dropdown-content a:hover {background-color: #f1f1f1}
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+}
 
 .dropdown:hover .dropdown-content {
   display: block;
@@ -73,13 +74,13 @@
 .dropdown:hover .dropbtn {
   background-color: #3e8e41;
 }
-.textbox{
+.textbox {
   white-space: pre-line;
 }
-.tag{
+.tag {
   margin: 5;
 }
 textarea {
-    padding: 20px;
-    margin: 20px;
+  padding: 20px;
+  margin: 20px;
 }
