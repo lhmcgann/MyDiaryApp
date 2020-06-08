@@ -423,8 +423,8 @@ def test_add_tag_existing():
     assert entry.add_tag(tag_name) is True
     assert len(entry["tags"]) == 1
 
-    tag_id = str(entry["tags"][0])  # actual ObjectId rn; TODO: should be a str
-    tag = Tag({"_id": tag_id})
+    title = entry["tags"][0]
+    tag = Tag({"title": title, 'd_id': entry['d_id']})
     assert tag.reload() is True
     assert tag["title"] == tag_name
 

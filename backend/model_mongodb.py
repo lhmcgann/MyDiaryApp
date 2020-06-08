@@ -132,7 +132,7 @@ class Entry(Model):
 
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
-        if self._id and not self.has_tag(title):
+        if self._id and self.reload() and not self.has_tag(title):
             tag = Tag().find_by_title(title, self.d_id)
             # if new tag, create in db
             if tag is None:
@@ -338,4 +338,3 @@ class Diary(Model):
                     entry = entry.make_printable(entry)
                     res.append(entry)
         return res
-
