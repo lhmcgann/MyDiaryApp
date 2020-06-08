@@ -5,6 +5,7 @@ from flask_cors import CORS
 from flask import abort
 from model_mongodb import *
 
+
 app = Flask(__name__)
 CORS(app)
 
