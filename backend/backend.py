@@ -34,16 +34,15 @@ def retrieve_diaries():
 
 @app.route('/diaries/<diaryId>', methods=['GET', 'PUT', 'DELETE'])
 def retrieve_diary(diaryId):
-    diary = Diary().find_by_id(diaryId)
+    diary = Diary({'_id': diaryId})
 
-    if not len(diary):
+    if not diary.reload():
         return jsonify(error=404, text="diary not found"), 404
 
-    diary = Diary(diary[0])
-
     if request.method == "GET":
-        diary["entries"] = Entry().get_entries_with_diary_id(diaryId)
-        return jsonify(Diary().make_printable(diary))
+        # frontend expects embedded entries
+        diary["entries"] = diary.get_entries()
+        return jsonify(diary)
 
     elif request.method == "PUT":
         title = request.args.get("title")
@@ -64,15 +63,13 @@ def retrieve_diary(diaryId):
 
 @app.route('/diaries/<diaryId>/entries', methods=['GET', 'POST'])
 def entries(diaryId):
-    diary = Diary().find_by_id(diaryId)
+    diary = Diary({'_id': diaryId})
 
-    if not len(diary):
+    if not diary.reload():
         return jsonify(error=404, text="diary not found"), 404
 
-    diary = diary[0]
-
     if request.method == "GET":
-        entries = Entry().get_entries_with_diary_id(diaryId)
+        entries = diary.get_entries()
 
         if request.json and "tags" in request.json:
             tags = request.json["tags"]
@@ -82,10 +79,10 @@ def entries(diaryId):
             sortBy_to_ascending = {"mostrecent": True, "leastrecent": False}
 
             if sortBy in sortBy_to_ascending:
-                entries = Entry.sort_entries(entries, mostRecent=sortBy_to_ascending[sortBy])
+                entries = diary.sort_entries_by_date_created(sortBy_to_ascending[sortBy])
 
+        return jsonify(Entry.make_entries_printable(entries)), 200
 
-        return jsonify(Entry.make_printable(entries)), 200
     elif request.method == "POST":
         title = None
         if request.args.get("title"):
@@ -95,30 +92,45 @@ def entries(diaryId):
         else:
             return jsonify(error="Need a title to create entry"), 400
 
-        doc = {"d_id": diaryId, "tags": [], "textBody": "",
-        "dateCreated": datetime.datetime.now(), "title": title}
-
+        doc = {"d_id": diaryId, "tags": [], "textBody": "", "title": title}
         entry = Entry(doc)
         entry.save()
 
         return jsonify(entry)
 
-@app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
-def modifyEntries(diaryId, entryId):
-    entry = Entry().find_by_id(entryId)
+@app.route('/diaries/<diaryId>/entries/<entryId>/tags/<tag>', methods=['DELETE', 'POST'])
+def modifyTags(diaryId, entryId, tag):
+    entry = Entry({'_id': entryId, 'd_id': diaryId})
 
-    if not len(entry):
+    if not entry.reload():
         return jsonify(error=404, text="entry not found"), 404
 
-    entry = Entry({"_id": entryId, "d_id": diaryId})
-    entry.reload()
+    if request.method == "DELETE":
+        if not entry.has_tag(tag):
+            return jsonify(error="Tag not found"), 404
+        else:
+            entry.delete_tag(tag)
+            return jsonify(sucess=True)
+    elif request.method == "POST":
+        if entry.has_tag(tag):
+            return jsonify(error="No duplicate tags"), 400
+        else:
+            entry.add_tag(tag)
+            return jsonify(sucess=True)
+
+
+@app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
+def modifyEntries(diaryId, entryId):
+    entry = Entry({'_id': entryId, 'd_id': diaryId})
+
+    if not entry.reload():
+        return jsonify(error=404, text="entry not found"), 404
 
     if request.method == "GET":
         return jsonify(entry)
     elif request.method == "PUT":
         title = entry["title"]
         text = entry["textBody"]
-        tags = []
 
         if request.args.get("title"):
             title = request.args.get("title")
@@ -133,11 +145,11 @@ def modifyEntries(diaryId, entryId):
         if request.args.get("tags"):
             return jsonify(error="Tags must be in the request body not in the params"), 400
         elif request.json and "tags" in request.json:
-            tags = list(set(request.json["tags"]))
+            for tag in list(set(request.json["tags"])):
+                entry.add_tag(tag)
 
         entry["title"] = title
         entry["textBody"] = text
-        entry["tags"] = tags
         entry.save()
 
         return jsonify(success=True)
