@@ -26,6 +26,8 @@ Instructions to Run Backend
 5. Send appropriate API requests following the API design doc in the docs folder of the repository
 
 Instructions to Run FrontEnd
+1. Run 'npm install'
+2. Run 'npm start'
 
 
 Travis CI Link:
