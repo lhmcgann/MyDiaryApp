@@ -442,8 +442,9 @@ def test_add_tag_new():
     entry.reload()
     assert isinstance(entry["_id"], str)
     assert len(entry["tags"]) == 1
-    for tag in entry["tags"]:
-        assert isinstance(tag, str)
+    assert 'valid tag' in entry['tags']
+    # for tag in entry["tags"]:
+    #     assert isinstance(tag, str)
 
     tag_name = "new tag"
     entry.add_tag(tag_name)
@@ -625,6 +626,13 @@ def test_remove_tag():
     assert Tag().find_by_title(tag_name, entry.d_id) is None
 
     assert entry.remove() is not None  # cleanup for testing
+
+
+def test_has_tag():
+    entry = Entry({'title': 'test_has_tag', 'd_id': D_ID, 'tags': []})
+    entry.save()
+    assert entry.has_tag('valid tag') is False
+    entry.remove()
 
 
 def test_sort_entries_no_id():
