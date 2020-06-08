@@ -15,6 +15,8 @@ class Model(dict):
     __delattr__ = dict.__delitem__
     __setattr__ = dict.__setitem__
 
+    # Saves this object to the db. If new object (i.e. no _id), inserts new and
+    #   generates a dateCreated, else updates the existing db object.
     def save(self):
         if not self._id:
             self = self.make_db_ready(self)
@@ -28,6 +30,8 @@ class Model(dict):
             self["_id"] = id
         self = self.make_printable(self)
 
+    # Fills this Model with the rest of its information from the db and makes
+    #   this Model printable. Returns True on success, False on failure.
     def reload(self):
         if self._id:  # if in the db
             result = self.collection.find_one({"_id": ObjectId(self._id)})
@@ -37,6 +41,9 @@ class Model(dict):
                 return True
         return False
 
+    # Removes this Model object from the database and clears this object.
+    #   Returns the db response on success, None if failed (no _id in this
+    #   object)
     def remove(self):
         if self._id:
             resp = self.collection.delete_one({"_id": ObjectId(self._id)})
@@ -66,6 +73,7 @@ class Entry(Model):
             return True
         return False
 
+    # remove this Entry from the db and remove its id from the Diary it was in
     def remove(self):
         diary = self.get_diary()             # the filled Diary obj
         if self.find_entry_in_diary(diary):  # remove id from diary's entries
@@ -168,6 +176,9 @@ class Tag(Model):
     db = cluster[dbStr]
     collection = db["tags"]
 
+    # create a Tag with a title in a specific diary. The title will be unique to
+    #   the Diary so if the title is already in the Diary, it will be updated
+    #   rather than creating another tag with the same title.
     def save(self):
         if self._id:
             super(Tag, self).save()
@@ -179,6 +190,8 @@ class Tag(Model):
                     self['_id'] = tag['_id']
                 super(Tag, self).save()
 
+    # Fills this Tag with the rest of its information from the db and makes this
+    #   Tag printable. Returns True on success, False on failure.
     def reload(self):
         if self._id:
             return super(Tag, self).reload()
@@ -189,6 +202,9 @@ class Tag(Model):
                 return True
         return False
 
+    # remove this Tag from the database and from all Entries it is in. returns
+    #   the number of Entries this Tag was removed from, or None on failure
+    #   (this Tag object must contain an _id or a title and diary id (d_id)).
     def remove(self):
         if self.title and self.d_id:
             self = self.find_by_title(self.title, self.d_id)
