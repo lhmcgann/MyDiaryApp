@@ -22,7 +22,6 @@ class Model(dict):
             self['dateCreated'] = datetime.utcnow()
             self.collection.insert_one(self)
         else:  # if has _id, must already be added (bc insert() creates the _id)
-            # TODO: any better way to handle _id's?
             id = self["_id"]
             del self["_id"]
             self = self.make_db_ready(self)
@@ -35,7 +34,6 @@ class Model(dict):
             result = self.collection.find_one({"_id": ObjectId(self._id)})
             if result:
                 self.update(result)  # updates created Diary (w/ id) to full doc
-                # self._id = str(self._id)  # may also need to convert entry ids
                 self = self.make_printable(self)
                 return True
         return False
@@ -62,7 +60,7 @@ class Entry(Model):
             return None
         super(Entry, self).save()
         entry = self.find_entry_in_diary(diary)  # the entry json obj
-        if not entry:                       # if new entry
+        if not entry:                            # if new entry
             diary["entries"].append(ObjectId(self._id))
             diary.save()
             return True
@@ -80,10 +78,6 @@ class Entry(Model):
     def make_db_ready(self, entry):
         if 'd_id' in entry:
             entry["d_id"] = ObjectId(entry["d_id"])
-        if 'tags' in entry:
-            tags = entry["tags"]
-            for i in range(len(tags)):
-                tags[i] = ObjectId(tags[i])
         return entry
 
     def make_printable(self, entry):
@@ -91,10 +85,6 @@ class Entry(Model):
             entry["_id"] = str(entry["_id"])
         if 'd_id' in entry:
             entry["d_id"] = str(entry["d_id"])
-        if 'tags' in entry:
-            tags = entry["tags"]
-            for i in range(len(tags)):
-                tags[i] = str(tags[i])
         return entry
 
     # TODO: test
@@ -141,6 +131,12 @@ class Entry(Model):
                     return self.collection.find_one({"_id": ObjectId(self._id)})
         return None
 
+    # TODO: test
+    def has_tag(self, title):
+        if self.reload():
+            return title in self['tags']
+        return None
+
     # title is the unique tag title. If new tag, create tag
     def add_tag(self, title):
         if self._id and self.reload():
@@ -148,8 +144,7 @@ class Entry(Model):
             # if new tag, create in db
             if tag is None:
                 Tag({"title": title, "d_id": self.d_id}).save()
-                tag = Tag().find_by_title(title, self.d_id)
-            self["tags"].append(tag["_id"])
+            self["tags"].append(title)
             self.save()
             return True
         return False
@@ -158,12 +153,9 @@ class Entry(Model):
         if self._id and self.reload():
             tag = Tag().find_by_title(title, self.d_id)
             if tag is not None:
-                tag.reload()
-                id = tag["_id"]
-                self["tags"].remove(id)
+                self["tags"].remove(title)
                 self.save()
                 return True
-                # return tag.remove() --> don't wan't to actually del from DB!
         return False
 
 
@@ -212,8 +204,8 @@ class Tag(Model):
             for entry_id in diary['entries']:
                 entry = Entry({'_id': entry_id})
                 entry.reload()
-                if self._id in entry['tags']:
-                    entry['tags'].remove(self._id)
+                if self.title in entry['tags']:
+                    entry['tags'].remove(self.title)
                     entry.save()
                     count = count + 1
             if super(Tag, self).remove():
@@ -251,6 +243,10 @@ class Diary(Model):
     # if del diary, make sure to del all entries!
     def remove(self):
         if self.reload():
+            for tag in self.get_tags():
+                t = Tag(tag)
+                t['_id'] = str(t['_id'])
+                t.remove()
             for entry_id in self['entries']:
                 # should already be strs but just in case
                 entry = Entry({'_id': str(entry_id), 'd_id': str(self._id)})
@@ -277,6 +273,13 @@ class Diary(Model):
         if self.reload():
             items = list(Entry.collection.find({"d_id": ObjectId(self._id)}))
             items = Entry.make_entries_printable(items)
+        return items
+
+    # TODO: test
+    def get_tags(self):
+        items = []
+        if self._id:
+            items = list(Tag.collection.find({"d_id": ObjectId(self._id)}))
         return items
 
     # def translate_to_tag_ids(self, tag_names):

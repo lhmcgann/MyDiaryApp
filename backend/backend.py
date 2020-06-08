@@ -103,34 +103,23 @@ def entries(diaryId):
 
 @app.route('/diaries/<diaryId>/entries/<entryId>/tags/<tag>', methods=['DELETE', 'POST'])
 def modifyTags(diaryId, entryId, tag):
-    print(tag)
-    entry = Entry().find_by_id(entryId)
+    entry = Entry({'_id': entryId, 'd_id': diaryId})
 
-    if not len(entry):
+    if not entry.reload():
         return jsonify(error=404, text="entry not found"), 404
 
-    entry = Entry({"_id": entryId, "d_id": diaryId})
-    entry.reload()
-
     if request.method == "DELETE":
-        tags = entry["tags"]
-        if tag not in tags:
+        if not entry.has_tag(tag):
             return jsonify(error="Tag not found"), 404
         else:
-            entry["tags"].remove(tag)
-            entry.save()
+            entry.delete_tag(tag)
             return jsonify(sucess=True)
     elif request.method == "POST":
-        tags = entry["tags"]
-
-        if tag in tags:
+        if entry.has_tag(tag):
             return jsonify(error="No duplicate tags"), 400
         else:
-            entry["tags"].append(tag)
-            entry.save()
+            entry.add_tag(tag)
             return jsonify(sucess=True)
-
-
 
 
 @app.route('/diaries/<diaryId>/entries/<entryId>', methods=['GET', 'DELETE', 'PUT'])
@@ -145,7 +134,6 @@ def modifyEntries(diaryId, entryId):
     elif request.method == "PUT":
         title = entry["title"]
         text = entry["textBody"]
-        tags = []
 
         if request.args.get("title"):
             title = request.args.get("title")
@@ -160,11 +148,11 @@ def modifyEntries(diaryId, entryId):
         if request.args.get("tags"):
             return jsonify(error="Tags must be in the request body not in the params"), 400
         elif request.json and "tags" in request.json:
-            tags = list(set(request.json["tags"]))
+            for tag in list(set(request.json["tags"])):
+                entry.add_tag(tag)
 
         entry["title"] = title
         entry["textBody"] = text
-        entry["tags"] = tags
         entry.save()
 
         return jsonify(success=True)
